@@ -5,34 +5,54 @@
     <title>لوحة الأدمن</title>
     <style>
         body { font-family: "Segoe UI", Tahoma, Arial; background: #f0f0f0; padding: 20px; }
-        h2 { text-align: center; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        h2 { text-align: center; margin-bottom: 30px; }
+
+        /* كل جدول */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 40px; }
         th, td { border: 1px solid #aaa; padding: 8px; text-align: center; }
         th { background: #1565c0; color: white; }
-        .group-title { background: #42a5f5; color: white; padding: 6px; font-weight: bold; margin-top: 20px; }
+
+        /* عنوان كل فوج */
+        .group-title {
+            padding: 10px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 5px;
+            border-radius: 6px;
+        }
+
+        /* ألوان مختلفة حسب الفوج */
+        .group1 { background: #42a5f5; }   /* أزرق فاتح للفوج1 */
+        .group2 { background: #66bb6a; }   /* أخضر للفوج2 */
+
+        /* مسافة بين كل مجموعة */
+        .group-container { margin-bottom: 50px; }
     </style>
 </head>
 <body>
     <h2>لوحة الأدمن - الطلاب</h2>
 
     {% for group_name, students in grouped_students.items() %}
-        <div class="group-title">{{ group_name }}</div>
-        <table>
-            <tr>
-                <th>اللقب</th>
-                <th>الاسم الشخصي</th>
-                <th>رقم الهاتف</th>
-                <th>ملاحظة</th>
-            </tr>
-            {% for student in students %}
-            <tr>
-                <td>{{ student['last_name'] }}</td>
-                <td>{{ student['first_name'] }}</td>
-                <td>{{ student['phone'] }}</td>
-                <td>{{ student['note'] }}</td>
-            </tr>
-            {% endfor %}
-        </table>
+        <div class="group-container">
+            {% set color_class = "group1" if "الفوج1" in group_name else "group2" %}
+            <div class="group-title {{ color_class }}">{{ group_name }}</div>
+            <table>
+                <tr>
+                    <th>اللقب</th>
+                    <th>الاسم الشخصي</th>
+                    <th>رقم الهاتف</th>
+                    <th>ملاحظة</th>
+                </tr>
+                {% for student in students %}
+                <tr>
+                    <td>{{ student['last_name'] }}</td>
+                    <td>{{ student['first_name'] }}</td>
+                    <td>{{ student['phone'] }}</td>
+                    <td>{{ student['note'] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
     {% endfor %}
 </body>
 </html>
