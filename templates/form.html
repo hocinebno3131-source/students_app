@@ -1,37 +1,47 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>استمارة التلميذ</title>
+    <meta charset="UTF-8">
+    <title>نموذج تسجيل الطلبة</title>
+    <style>
+        body { font-family: "Segoe UI", Tahoma, Arial; background: #f0f0f0; }
+        .container { max-width: 500px; margin: 50px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 0 15px rgba(0,0,0,0.2); }
+        input, select { width: 100%; padding: 10px; margin: 8px 0; border-radius: 6px; border: 1px solid #aaa; font-size: 16px; }
+        button { width: 100%; padding: 12px; background: #1565c0; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 18px; }
+        button:hover { background: #0d47a1; }
+    </style>
 </head>
-
 <body>
+    <div class="container">
+        <h2>نموذج تسجيل الطلبة</h2>
+        <form method="POST" action="/">
+            <input type="text" name="last_name" placeholder="اللقب" required>
+            <input type="text" name="first_name" placeholder="الاسم الشخصي" required>
 
-<h2>إدخال معلومات التلميذ</h2>
+            <!-- القسم -->
+            <select name="class" required>
+                <option value="">اختر القسم</option>
+                <option value="أولى علوم1">أولى علوم1</option>
+                <option value="أولى علوم2">أولى علوم2</option>
+                <option value="أولى علوم3">أولى علوم3</option>
+                <option value="أولى علوم4">أولى علوم4</option>
+                <option value="أولى علوم5">أولى علوم5</option>
+                <option value="أولى علوم6">أولى علوم6</option>
+                <option value="أولى علوم7">أولى علوم7</option>
+            </select>
 
-<form method="post">
+            <!-- الفوج -->
+            <select name="group" required>
+                <option value="">اختر الفوج</option>
+                <option value="الفوج1">الفوج1</option>
+                <option value="الفوج2">الفوج2</option>
+            </select>
 
-اللقب:<br>
-<input name="last_name" required><br><br>
+            <input type="text" name="phone" placeholder="رقم الهاتف" required>
+            <input type="text" name="note" placeholder="ملاحظة">
 
-الاسم:<br>
-<input name="first_name" required><br><br>
-
-القسم:<br>
-<input name="class" required><br><br>
-
-الفوج:<br>
-<input name="group" required><br><br>
-
-الهاتف:<br>
-<input name="phone"><br><br>
-
-ملاحظة:<br>
-<input name="note"><br><br>
-
-<button type="submit">إرسال</button>
-
-</form>
-
+            <button type="submit">إرسال</button>
+        </form>
+    </div>
 </body>
 </html>
