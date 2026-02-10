@@ -43,7 +43,7 @@ def success():
 
 
 # -------------------------------
-# صفحة الأدمن — عرض الجدول
+# صفحة الأدمن — عرض الجدول مع فلتر
 # -------------------------------
 @app.route("/admin")
 def admin():
@@ -53,15 +53,37 @@ def admin():
             reader = csv.DictReader(f, delimiter=";")
             students = list(reader)
 
-    # تقسيم الطلاب حسب القسم والفوج
+    # الحصول على قائمة الأقسام والفوجات الموجودة
+    classes = sorted({s['class'] for s in students})
+    groups = sorted({s['group'] for s in students})
+
+    # قراءة الفلتر من الرابط
+    selected_class = request.args.get('class')
+    selected_group = request.args.get('group')
+
+    # فلترة الطلاب حسب الاختيار
+    filtered_students = students
+    if selected_class:
+        filtered_students = [s for s in filtered_students if s['class'] == selected_class]
+    if selected_group:
+        filtered_students = [s for s in filtered_students if s['group'] == selected_group]
+
+    # تجميع حسب الفوج والقسم بعد الفلترة
     grouped_students = {}
-    for student in students:
+    for student in filtered_students:
         key = f"{student['class']} - {student['group']}"
         if key not in grouped_students:
             grouped_students[key] = []
         grouped_students[key].append(student)
 
-    return render_template("admin.html", grouped_students=grouped_students)
+    return render_template(
+        "admin.html",
+        grouped_students=grouped_students,
+        classes=classes,
+        groups=groups,
+        selected_class=selected_class,
+        selected_group=selected_group
+    )
 
 
 # -------------------------------
