@@ -21,8 +21,12 @@ def form():
             request.form["note"]
         ]
 
+        # تحقق إذا كان الملف موجود أو أضف رأس الأعمدة إذا جديد
+        file_exists = os.path.exists(CSV_FILE)
         with open(CSV_FILE, "a", newline="", encoding="utf-8-sig") as f:
             writer = csv.writer(f, delimiter=";")
+            if not file_exists:
+                writer.writerow(["last_name", "first_name", "class", "group", "phone", "note"])
             writer.writerow(data)
 
         return redirect("/success")
@@ -49,11 +53,19 @@ def admin():
             reader = csv.DictReader(f, delimiter=";")
             students = list(reader)
 
-    return render_template("admin.html", students=students)
+    # تقسيم الطلاب حسب القسم والفوج
+    grouped_students = {}
+    for student in students:
+        key = f"{student['class']} - {student['group']}"
+        if key not in grouped_students:
+            grouped_students[key] = []
+        grouped_students[key].append(student)
+
+    return render_template("admin.html", grouped_students=grouped_students)
 
 
 # -------------------------------
-# تشغيل التطبيق على Railway
+# تشغيل التطبيق
 # -------------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
