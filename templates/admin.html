@@ -5,33 +5,46 @@
     <title>لوحة الأدمن</title>
     <style>
         body { font-family: "Segoe UI", Tahoma, Arial; background: #f0f0f0; padding: 20px; }
-        h2 { text-align: center; margin-bottom: 30px; }
+        h2 { text-align: center; margin-bottom: 20px; }
 
-        /* كل جدول */
+        form { text-align: center; margin-bottom: 30px; }
+        select { padding: 6px; margin: 0 5px; font-size: 16px; }
+        button { padding: 6px 12px; font-size: 16px; cursor: pointer; }
+
         table { width: 100%; border-collapse: collapse; margin-bottom: 40px; }
         th, td { border: 1px solid #aaa; padding: 8px; text-align: center; }
         th { background: #1565c0; color: white; }
 
-        /* عنوان كل فوج */
-        .group-title {
-            padding: 10px;
-            font-weight: bold;
-            color: white;
-            margin-bottom: 5px;
-            border-radius: 6px;
-        }
-
-        /* ألوان مختلفة حسب الفوج */
-        .group1 { background: #42a5f5; }   /* أزرق فاتح للفوج1 */
-        .group2 { background: #66bb6a; }   /* أخضر للفوج2 */
-
-        /* مسافة بين كل مجموعة */
+        .group-title { padding: 10px; font-weight: bold; color: white; margin-bottom: 5px; border-radius: 6px; }
+        .group1 { background: #42a5f5; }
+        .group2 { background: #66bb6a; }
         .group-container { margin-bottom: 50px; }
     </style>
 </head>
 <body>
     <h2>لوحة الأدمن - الطلاب</h2>
 
+    <!-- فلتر القسم والفوج -->
+    <form method="get" action="/admin">
+        <select name="class">
+            <option value="">اختر القسم</option>
+            {% for c in classes %}
+                <option value="{{ c }}" {% if c == selected_class %}selected{% endif %}>{{ c }}</option>
+            {% endfor %}
+        </select>
+
+        <select name="group">
+            <option value="">اختر الفوج</option>
+            {% for g in groups %}
+                <option value="{{ g }}" {% if g == selected_group %}selected{% endif %}>{{ g }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">فلترة</button>
+        <a href="/admin"><button type="button">إظهار الكل</button></a>
+    </form>
+
+    <!-- عرض الجداول -->
     {% for group_name, students in grouped_students.items() %}
         <div class="group-container">
             {% set color_class = "group1" if "الفوج1" in group_name else "group2" %}
