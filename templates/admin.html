@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>لوحة الأدمن</title>
+</head>
+
+<body>
+
+<h2>قائمة التلاميذ</h2>
+
+<table border="1">
+<tr>
+<th>اللقب</th>
+<th>الاسم</th>
+<th>القسم</th>
+<th>الفوج</th>
+<th>الهاتف</th>
+<th>ملاحظة</th>
+</tr>
+
+{% for s in students %}
+<tr>
+<td>{{ s.last_name }}</td>
+<td>{{ s.first_name }}</td>
+<td>{{ s.class }}</td>
+<td>{{ s.group }}</td>
+<td>{{ s.phone }}</td>
+<td>{{ s.note }}</td>
+</tr>
+{% endfor %}
+
+</table>
+
+</body>
+</html>
