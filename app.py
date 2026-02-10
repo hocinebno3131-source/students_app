@@ -6,7 +6,9 @@ app = Flask(__name__)
 
 CSV_FILE = "students.csv"
 
+# -------------------------------
 # صفحة الاستمارة للطلبة
+# -------------------------------
 @app.route("/", methods=["GET", "POST"])
 def form():
     if request.method == "POST":
@@ -28,13 +30,17 @@ def form():
     return render_template("form.html")
 
 
+# -------------------------------
 # صفحة نجاح الإرسال
+# -------------------------------
 @app.route("/success")
 def success():
     return "<h2>تم إرسال البيانات بنجاح ✅</h2>"
 
 
+# -------------------------------
 # صفحة الأدمن — عرض الجدول
+# -------------------------------
 @app.route("/admin")
 def admin():
     students = []
@@ -46,5 +52,9 @@ def admin():
     return render_template("admin.html", students=students)
 
 
+# -------------------------------
+# تشغيل التطبيق على Railway
+# -------------------------------
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
