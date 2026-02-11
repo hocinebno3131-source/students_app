@@ -33,7 +33,7 @@ def form():
 
         students = read_students()
 
-        # ✅ منع التكرار
+        # ✅ منع التكرار (نافذة احترافية بدل نص)
         for s in students:
             if (
                 s["last_name"] == last_name and
@@ -41,7 +41,7 @@ def form():
                 s["class"] == class_name and
                 s["group"] == group
             ):
-                return "<h3>⚠️ هذا الطالب مسجل مسبقاً</h3>"
+                return redirect("/?duplicate=1")
 
         data = [last_name, first_name, class_name, group, phone, note]
 
@@ -64,7 +64,7 @@ def success():
     return "<h2>تم إرسال البيانات بنجاح ✅</h2>"
 
 # -------------------------
-# صفحة الأدمن (كما هي — لم نغيرها)
+# صفحة الأدمن (لم نكسرها)
 # -------------------------
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
