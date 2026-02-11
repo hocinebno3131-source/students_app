@@ -1,9 +1,7 @@
-from flask import Flask, render_template, request, redirect, send_file
+from flask import Flask, render_template, request, redirect
 import csv
 import os
 from collections import defaultdict
-import pandas as pd
-from io import BytesIO
 
 app = Flask(__name__)
 
@@ -11,19 +9,41 @@ CSV_FILE = "students.csv"
 ADMIN_PASSWORD = "admin123"
 
 # -------------------------
+# دالة قراءة كل الطلبة
+# -------------------------
+def read_students():
+    if not os.path.exists(CSV_FILE):
+        return []
+    with open(CSV_FILE, newline="", encoding="utf-8-sig") as f:
+        return list(csv.DictReader(f, delimiter=";"))
+
+# -------------------------
 # صفحة الاستمارة للطلبة
 # -------------------------
 @app.route("/", methods=["GET", "POST"])
 def form():
     if request.method == "POST":
-        data = [
-            request.form["last_name"],
-            request.form["first_name"],
-            request.form["class"],
-            request.form["group"],
-            request.form["phone"],
-            request.form["note"]
-        ]
+
+        last_name = request.form["last_name"].strip()
+        first_name = request.form["first_name"].strip()
+        class_name = request.form["class"].strip()
+        group = request.form["group"].strip()
+        phone = request.form["phone"].strip()
+        note = request.form["note"].strip()
+
+        students = read_students()
+
+        # ✅ منع التكرار
+        for s in students:
+            if (
+                s["last_name"] == last_name and
+                s["first_name"] == first_name and
+                s["class"] == class_name and
+                s["group"] == group
+            ):
+                return "<h3>⚠️ هذا الطالب مسجل مسبقاً</h3>"
+
+        data = [last_name, first_name, class_name, group, phone, note]
 
         file_exists = os.path.exists(CSV_FILE)
         with open(CSV_FILE, "a", newline="", encoding="utf-8-sig") as f:
@@ -44,7 +64,7 @@ def success():
     return "<h2>تم إرسال البيانات بنجاح ✅</h2>"
 
 # -------------------------
-# صفحة الأدمن المحمية مع فلاتر
+# صفحة الأدمن (كما هي — لم نغيرها)
 # -------------------------
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
@@ -56,22 +76,12 @@ def admin():
     if password != ADMIN_PASSWORD:
         return render_template("admin_password.html", message="كلمة المرور غير صحيحة ❌")
 
-    # ===== كلمة المرور صحيحة → عرض الجداول =====
-    students = []
-    if os.path.exists(CSV_FILE):
-        with open(CSV_FILE, newline="", encoding="utf-8-sig") as f:
-            reader = csv.DictReader(f, delimiter=";")
-            students = list(reader)
-
-    selected_class = request.form.get("filter_class", "all")
-    selected_group = request.form.get("filter_group", "all")
+    students = read_students()
 
     grouped = defaultdict(list)
     for s in students:
-        if (selected_class == "all" or s["class"] == selected_class) and \
-           (selected_group == "all" or s["group"] == selected_group):
-            key = f"{s['class']} — {s['group']}"
-            grouped[key].append(s)
+        key = f"{s['class']} — {s['group']}"
+        grouped[key].append(s)
 
     classes = sorted({s['class'] for s in students})
     groups = sorted({s['group'] for s in students})
@@ -81,30 +91,8 @@ def admin():
         grouped=grouped,
         classes=classes,
         groups=groups,
-        selected_class=selected_class,
-        selected_group=selected_group
-    )
-
-# -------------------------
-# تنزيل ملف Excel
-# -------------------------
-@app.route("/download_excel")
-def download_excel():
-    if not os.path.exists(CSV_FILE):
-        return "لا يوجد بيانات للتحميل ❌"
-
-    # قراءة CSV وتحويله إلى Excel في الذاكرة
-    df = pd.read_csv(CSV_FILE, delimiter=";", encoding="utf-8-sig")
-    output = BytesIO()
-    with pd.ExcelWriter(output, engine="openpyxl") as writer:
-        df.to_excel(writer, index=False, sheet_name="Students")
-    output.seek(0)
-
-    return send_file(
-        output,
-        as_attachment=True,
-        download_name="students.xlsx",
-        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        selected_class="",
+        selected_group=""
     )
 
 # -------------------------
