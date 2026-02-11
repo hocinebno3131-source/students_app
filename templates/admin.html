@@ -6,19 +6,105 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
-        body { font-family: 'Cairo', sans-serif; background: #f4f6f9; margin: 0; padding: 20px; color: #333; }
-        h1 { text-align: center; color: #1976d2; }
-        .filters { display: flex; gap: 15px; justify-content: center; margin-bottom: 25px; flex-wrap: wrap; }
-        select, button { padding: 10px 15px; border-radius: 8px; border: none; font-size: 16px; cursor: pointer; transition: 0.3s; }
-        select { background: #e0e0e0; }
-        select:hover { background: #d5d5d5; }
-        button { background: #1976d2; color: white; }
-        button:hover { background: #0d47a1; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 35px; background: white; box-shadow: 0 3px 8px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
-        th, td { padding: 12px 15px; text-align: center; }
-        th { background: #1976d2; color: white; }
-        tr:nth-child(even) { background: #f1f1f1; }
-        .table-title { margin: 15px 0 5px 0; font-size: 18px; color: #333; font-weight: bold; }
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            background: #f4f6f9; 
+            margin: 0; 
+            padding: 20px; 
+            color: #333; 
+        }
+        h1 { 
+            text-align: center; 
+            color: #1976d2; 
+            margin-bottom: 30px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filters label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        select, button {
+            padding: 10px 18px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        select {
+            background: #e0e0e0;
+        }
+
+        select:hover {
+            background: #d5d5d5;
+        }
+
+        button {
+            background: #1976d2;
+            color: white;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #0d47a1;
+            transform: scale(1.05);
+        }
+
+        .tables-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .tables-header span {
+            margin-left: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 35px;
+            background: white;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: center;
+        }
+
+        th {
+            background: #1976d2;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f1f1f1;
+        }
+
+        .table-title {
+            margin: 15px 0 5px 0;
+            font-size: 18px;
+            color: #333;
+            font-weight: bold;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -26,6 +112,8 @@
 <h1>لوحة الأدمن — عرض الطلبة</h1>
 
 <div class="filters">
+    <div class="tables-header">🎛️ <span>فلترة حسب القسم والفوج</span></div>
+
     <select id="classFilter">
         <option value="">اختر القسم</option>
         {% for c in classes %}
