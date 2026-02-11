@@ -6,17 +6,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
-        body { 
-            font-family: 'Cairo', sans-serif; 
-            background: #f4f6f9; 
-            margin: 0; 
-            padding: 20px; 
-            color: #333; 
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
         }
-        h1 { 
-            text-align: center; 
-            color: #1976d2; 
-            margin-bottom: 30px;
+
+        h1 {
+            text-align: center;
+            color: #1976d2;
         }
 
         .filters {
@@ -25,22 +25,15 @@
             justify-content: center;
             margin-bottom: 25px;
             flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .filters label {
-            font-weight: bold;
-            margin-right: 5px;
         }
 
         select, button {
-            padding: 10px 18px;
+            padding: 10px 15px;
             border-radius: 8px;
             border: none;
             font-size: 16px;
             cursor: pointer;
             transition: 0.3s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         select {
@@ -54,34 +47,32 @@
         button {
             background: #1976d2;
             color: white;
-            font-weight: bold;
         }
 
         button:hover {
             background: #0d47a1;
-            transform: scale(1.05);
         }
 
-        .tables-header {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 20px;
-            margin-bottom: 15px;
+        .table-wrapper {
+            margin-bottom: 35px;
+            border-radius: 8px;
+            overflow: hidden;
         }
 
-        .tables-header span {
-            margin-left: 10px;
+        .table-title {
+            margin: 15px 0 5px 0;
+            font-size: 18px;
+            color: #fff;
+            font-weight: bold;
+            padding: 8px 12px;
+            border-radius: 6px 6px 0 0;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 35px;
             background: white;
             box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-            border-radius: 8px;
-            overflow: hidden;
         }
 
         th, td {
@@ -97,14 +88,6 @@
         tr:nth-child(even) {
             background: #f1f1f1;
         }
-
-        .table-title {
-            margin: 15px 0 5px 0;
-            font-size: 18px;
-            color: #333;
-            font-weight: bold;
-            text-align: center;
-        }
     </style>
 </head>
 <body>
@@ -112,8 +95,6 @@
 <h1>لوحة الأدمن — عرض الطلبة</h1>
 
 <div class="filters">
-    <div class="tables-header">🎛️ <span>فلترة حسب القسم والفوج</span></div>
-
     <select id="classFilter">
         <option value="">اختر القسم</option>
         {% for c in classes %}
@@ -128,14 +109,20 @@
         {% endfor %}
     </select>
 
-    <button onclick="applyFilter()">فلترة</button>
+    <button onclick="applyFilter()">🎛️ فلترة</button>
     <button onclick="showAll()">إظهار الكل</button>
 </div>
 
 <div id="tablesContainer">
     {% for group_name, students in grouped.items() %}
-    <div class="table-wrapper" data-class="{{ group_name.split(' — ')[0] }}" data-group="{{ group_name.split(' — ')[1] }}">
-        <div class="table-title">{{ group_name }}</div>
+    <div class="table-wrapper" 
+         data-class="{{ group_name.split(' — ')[0] }}" 
+         data-group="{{ group_name.split(' — ')[1] }}">
+        
+        <div class="table-title" style="background-color: {{ loop.cycle('#1976d2', '#388e3c', '#f57c00', '#7b1fa2', '#c2185b', '#0288d1') }}">
+            {{ group_name }}
+        </div>
+        
         <table>
             <thead>
                 <tr>
