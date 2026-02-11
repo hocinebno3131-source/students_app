@@ -6,83 +6,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
-        body {
-            font-family: 'Cairo', sans-serif;
-            background: #f4f6f9;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-
-        h1 {
-            text-align: center;
-            color: #1976d2;
-        }
-
-        .filters {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-        }
-
-        select, button {
-            padding: 10px 15px;
-            border-radius: 8px;
-            border: none;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        select {
-            background: #e0e0e0;
-        }
-
-        select:hover {
-            background: #d5d5d5;
-        }
-
-        button {
-            background: #1976d2;
-            color: white;
-        }
-
-        button:hover {
-            background: #0d47a1;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 35px;
-            background: white;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        th, td {
-            padding: 12px 15px;
-            text-align: center;
-        }
-
-        th {
-            background: #1976d2;
-            color: white;
-        }
-
-        tr:nth-child(even) {
-            background: #f1f1f1;
-        }
-
-        .table-title {
-            margin: 15px 0 5px 0;
-            font-size: 18px;
-            color: #333;
-            font-weight: bold;
-        }
+        body { font-family: 'Cairo', sans-serif; background: #f4f6f9; margin: 0; padding: 20px; color: #333; }
+        h1 { text-align: center; color: #1976d2; }
+        .filters { display: flex; gap: 15px; justify-content: center; margin-bottom: 25px; flex-wrap: wrap; }
+        select, button { padding: 10px 15px; border-radius: 8px; border: none; font-size: 16px; cursor: pointer; transition: 0.3s; }
+        select { background: #e0e0e0; }
+        select:hover { background: #d5d5d5; }
+        button { background: #1976d2; color: white; }
+        button:hover { background: #0d47a1; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 35px; background: white; box-shadow: 0 3px 8px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
+        th, td { padding: 12px 15px; text-align: center; }
+        th { background: #1976d2; color: white; }
+        tr:nth-child(even) { background: #f1f1f1; }
+        .table-title { margin: 15px 0 5px 0; font-size: 18px; color: #333; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -93,14 +29,14 @@
     <select id="classFilter">
         <option value="">اختر القسم</option>
         {% for c in classes %}
-        <option value="{{ c }}">{{ c }}</option>
+        <option value="{{ c }}" {% if selected_class==c %}selected{% endif %}>{{ c }}</option>
         {% endfor %}
     </select>
 
     <select id="groupFilter">
         <option value="">اختر الفوج</option>
         {% for g in groups %}
-        <option value="{{ g }}">{{ g }}</option>
+        <option value="{{ g }}" {% if selected_group==g %}selected{% endif %}>{{ g }}</option>
         {% endfor %}
     </select>
 
