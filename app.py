@@ -96,9 +96,8 @@ def download_excel():
     # قراءة CSV وتحويله إلى Excel في الذاكرة
     df = pd.read_csv(CSV_FILE, delimiter=";", encoding="utf-8-sig")
     output = BytesIO()
-    with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
         df.to_excel(writer, index=False, sheet_name="Students")
-        writer.save()
     output.seek(0)
 
     return send_file(
