@@ -41,10 +41,9 @@
             box-shadow: 0 0 5px rgba(25,118,210,0.5); 
             outline: none; 
         }
-        select { 
-            background: #e0e0e0; 
-        }
+        select { background: #e0e0e0; }
         select:hover { background: #d5d5d5; }
+
         button { 
             background: #1976d2; 
             color: white; 
@@ -57,15 +56,62 @@
             background: #0d47a1; 
             transform: scale(1.03); 
         }
-        .icon { margin-left: 5px; }
+
+        /* نافذة التنبيه */
+        .modal-bg {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 300px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+            animation: pop 0.25s ease;
+        }
+
+        .modal h3 {
+            margin: 0 0 10px;
+            color: #d32f2f;
+        }
+
+        .modal button {
+            margin-top: 10px;
+            background: #d32f2f;
+        }
+
+        @keyframes pop {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
     </style>
 </head>
+
 <body>
+
+    <!-- نافذة التكرار -->
+    <div class="modal-bg" id="dupModal">
+        <div class="modal">
+            <h3>⚠️ الطالب مسجل مسبقاً</h3>
+            <p>لا يمكن تسجيل نفس الطالب مرتين بنفس القسم والفوج</p>
+            <button onclick="closeModal()">حسناً</button>
+        </div>
+    </div>
+
     <div class="container">
         <h2>📝 استمارة تسجيل الطالب</h2>
+
         <form method="POST">
             <input type="text" name="last_name" placeholder="اللقب" required>
             <input type="text" name="first_name" placeholder="الاسم" required>
+
             <select name="class" required>
                 <option value="">اختر القسم</option>
                 <option value="أولى علوم1">أولى علوم1</option>
@@ -76,15 +122,30 @@
                 <option value="أولى علوم6">أولى علوم6</option>
                 <option value="أولى علوم7">أولى علوم7</option>
             </select>
+
             <select name="group" required>
                 <option value="">اختر الفوج</option>
                 <option value="الفوج1">الفوج1</option>
                 <option value="الفوج2">الفوج2</option>
             </select>
+
             <input type="text" name="phone" placeholder="📞 الهاتف">
             <textarea name="note" placeholder="✏️ ملاحظة" rows="3"></textarea>
+
             <button type="submit">إرسال ✅</button>
         </form>
     </div>
+
+<script>
+function closeModal() {
+    document.getElementById("dupModal").style.display = "none";
+}
+
+const params = new URLSearchParams(window.location.search);
+if (params.get("duplicate") === "1") {
+    document.getElementById("dupModal").style.display = "flex";
+}
+</script>
+
 </body>
 </html>
