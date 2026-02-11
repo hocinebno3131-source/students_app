@@ -26,7 +26,6 @@ def form():
         ]
 
         file_exists = os.path.exists(CSV_FILE)
-
         with open(CSV_FILE, "a", newline="", encoding="utf-8-sig") as f:
             writer = csv.writer(f, delimiter=";")
             if not file_exists:
@@ -49,6 +48,7 @@ def success():
 # -------------------------
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
+
     if request.method == "GET":
         return render_template("admin_password.html", message="")
 
@@ -56,6 +56,7 @@ def admin():
     if password != ADMIN_PASSWORD:
         return render_template("admin_password.html", message="كلمة المرور غير صحيحة ❌")
 
+    # ===== كلمة المرور صحيحة → عرض الجداول =====
     students = []
     if os.path.exists(CSV_FILE):
         with open(CSV_FILE, newline="", encoding="utf-8-sig") as f:
@@ -85,26 +86,27 @@ def admin():
     )
 
 # -------------------------
-# مسار تنزيل Excel
+# تنزيل ملف Excel
 # -------------------------
 @app.route("/download_excel")
 def download_excel():
     if not os.path.exists(CSV_FILE):
-        return "لا يوجد بيانات للتنزيل."
+        return "لا يوجد بيانات للتحميل ❌"
 
+    # قراءة CSV وتحويله إلى Excel في الذاكرة
     df = pd.read_csv(CSV_FILE, delimiter=";", encoding="utf-8-sig")
-
-    # إنشاء ملف Excel في الذاكرة
     output = BytesIO()
     with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
         df.to_excel(writer, index=False, sheet_name="Students")
         writer.save()
     output.seek(0)
 
-    return send_file(output,
-                     download_name="students.xlsx",
-                     as_attachment=True,
-                     mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name="students.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
 # -------------------------
 # تشغيل التطبيق
