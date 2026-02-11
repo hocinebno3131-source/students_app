@@ -6,66 +6,97 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
-body { font-family: 'Cairo', sans-serif; background:#f4f6f9; padding:20px }
-h1 { text-align:center; color:#1976d2 }
+body { font-family: 'Cairo', sans-serif; background: #f4f6f9; margin: 0; padding: 20px; color: #333; }
+h1 { text-align: center; color: #1976d2; }
 
-button {
-padding:10px 15px;
-border-radius:8px;
-border:none;
-cursor:pointer;
-background:#1976d2;
-color:white;
+.filters { display: flex; gap: 15px; justify-content: center; margin-bottom: 25px; flex-wrap: wrap; }
+
+select, button {
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
 }
 
-.delete-btn { background:#e53935 }
-.delete-btn:hover { background:#b71c1c }
+select { background: #e0e0e0; }
+select:hover { background: #d5d5d5; }
+
+button { background: #1976d2; color: white; }
+button:hover { background: #0d47a1; }
+
+#printBtn { background: #f57c00; }
+#printBtn:hover { background: #ef6c00; }
+
+.delete-btn {
+    background: #e53935;
+    padding: 6px 10px;
+    font-size: 14px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.delete-btn:hover { background: #b71c1c; }
 
 table {
-width:100%;
-border-collapse:collapse;
-background:white;
-margin-bottom:30px;
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 35px;
+    background: white;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-th,td { padding:12px; text-align:center }
-th { background:#1976d2; color:white }
+th, td { padding: 12px 15px; text-align: center; }
+th { background: #1976d2; color: white; }
+tr:nth-child(even) { background: #f1f1f1; }
 
-.table-title { font-weight:bold; margin:15px 0 }
+.table-title { margin: 15px 0 5px 0; font-size: 18px; font-weight: bold; }
 
-/* -------- MODAL -------- */
-.modal {
-display:none;
-position:fixed;
-inset:0;
-background:rgba(0,0,0,0.4);
-justify-content:center;
-align-items:center;
+/* نافذة الحذف */
+#confirmModal {
+    display: none;
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    z-index: 1000;
+    width: 300px;
+    text-align: center;
 }
 
-.modal-box {
-background:white;
-padding:25px;
-border-radius:12px;
-width:320px;
-text-align:center;
-box-shadow:0 10px 25px rgba(0,0,0,.25);
-animation:pop .2s ease;
+#confirmModal button {
+    margin: 10px;
+    width: 100px;
+    padding: 8px 0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
 }
 
-@keyframes pop {
-from { transform:scale(.8); opacity:0 }
-to { transform:scale(1); opacity:1 }
+#confirmModal #cancelBtn { background: #9e9e9e; color: white; border: none; }
+#confirmModal #cancelBtn:hover { background: #616161; }
+#confirmModal #okBtn { background: #e53935; color: white; border: none; }
+#confirmModal #okBtn:hover { background: #b71c1c; }
+
+.overlay {
+    display: none;
+    position: fixed;
+    top:0; left:0; width:100%; height:100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 900;
 }
 
-.modal-actions {
-display:flex;
-gap:10px;
-margin-top:20px;
+@media print {
+    body * { visibility: hidden; }
+    #tablesContainer, #tablesContainer * { visibility: visible; }
+    #tablesContainer { position: absolute; left: 0; top: 0; width: 100%; }
 }
-
-.cancel-btn { background:#9e9e9e }
-.confirm-btn { background:#e53935 }
 </style>
 </head>
 
@@ -73,18 +104,50 @@ margin-top:20px;
 
 <h1>لوحة الأدمن — عرض الطلبة</h1>
 
+<div class="filters">
+<select id="classFilter">
+<option value="">اختر القسم</option>
+{% for c in classes %}
+<option value="{{ c }}">{{ c }}</option>
+{% endfor %}
+</select>
+
+<select id="groupFilter">
+<option value="">اختر الفوج</option>
+{% for g in groups %}
+<option value="{{ g }}">{{ g }}</option>
+{% endfor %}
+</select>
+
+<button onclick="applyFilter()">فلترة</button>
+<button onclick="showAll()">إظهار الكل</button>
+<button id="printBtn" onclick="printTables()">🖨️ طباعة</button>
+</div>
+
 <div id="tablesContainer">
 {% for group_name, students in grouped.items() %}
+<div class="table-wrapper"
+     data-class="{{ group_name.split(' — ')[0] }}"
+     data-group="{{ group_name.split(' — ')[1] }}">
+
 <div class="table-title">{{ group_name }}</div>
 
 <table>
+<thead>
 <tr>
-<th>اللقب</th><th>الاسم</th><th>القسم</th><th>الفوج</th>
-<th>الهاتف</th><th>ملاحظة</th><th>حذف</th>
+<th>اللقب</th>
+<th>الاسم</th>
+<th>القسم</th>
+<th>الفوج</th>
+<th>الهاتف</th>
+<th>ملاحظة</th>
+<th>حذف</th>
 </tr>
+</thead>
 
+<tbody>
 {% for s in students %}
-<tr id="row-{{ s['_index'] }}">
+<tr>
 <td>{{ s['last_name'] }}</td>
 <td>{{ s['first_name'] }}</td>
 <td>{{ s['class'] }}</td>
@@ -92,51 +155,73 @@ margin-top:20px;
 <td>{{ s['phone'] }}</td>
 <td>{{ s['note'] }}</td>
 <td>
-<button class="delete-btn" onclick="openModal({{ s['_index'] }})">
+<button class="delete-btn" onclick="openConfirm({{ s['_index'] }})">
 🗑 حذف
 </button>
 </td>
 </tr>
 {% endfor %}
+</tbody>
+
 </table>
+</div>
 {% endfor %}
 </div>
 
-<!-- Modal -->
-<div id="deleteModal" class="modal">
-<div class="modal-box">
-<h3>تأكيد الحذف</h3>
-<p>هل تريد حذف هذا الطالب؟</p>
-<div class="modal-actions">
-<button class="cancel-btn" onclick="closeModal()">إلغاء</button>
-<button class="confirm-btn" onclick="confirmDelete()">تأكيد</button>
-</div>
-</div>
+<!-- نافذة الحذف -->
+<div class="overlay" id="overlay"></div>
+<div id="confirmModal">
+<p>هل أنت متأكد من حذف هذا الطالب؟</p>
+<button id="okBtn">تأكيد</button>
+<button id="cancelBtn">إلغاء</button>
 </div>
 
 <script>
-let deleteIndex = null
+let deleteIndex = null;
 
-function openModal(i){
-deleteIndex = i
-document.getElementById("deleteModal").style.display="flex"
+function applyFilter() {
+    const classVal = document.getElementById("classFilter").value;
+    const groupVal = document.getElementById("groupFilter").value;
+    document.querySelectorAll(".table-wrapper").forEach(t => {
+        t.style.display =
+        ((classVal === "" || t.dataset.class === classVal) &&
+         (groupVal === "" || t.dataset.group === groupVal))
+         ? "block" : "none";
+    });
 }
 
-function closeModal(){
-deleteIndex = null
-document.getElementById("deleteModal").style.display="none"
+function showAll() {
+    document.querySelectorAll(".table-wrapper").forEach(t => t.style.display="block");
+    document.getElementById("classFilter").value="";
+    document.getElementById("groupFilter").value="";
 }
 
-function confirmDelete(){
-fetch("/delete/"+deleteIndex,{method:"POST"})
-.then(r=>r.json())
-.then(d=>{
-if(d.status==="ok"){
-document.getElementById("row-"+deleteIndex).remove()
+function printTables() { window.print(); }
+
+// -------------------------
+// حذف احترافي
+function openConfirm(index) {
+    deleteIndex = index;
+    document.getElementById("overlay").style.display = "block";
+    document.getElementById("confirmModal").style.display = "block";
 }
-closeModal()
-})
-}
+
+document.getElementById("cancelBtn").onclick = function() {
+    document.getElementById("overlay").style.display = "none";
+    document.getElementById("confirmModal").style.display = "none";
+};
+
+document.getElementById("okBtn").onclick = function() {
+    fetch("/delete/" + deleteIndex, { method: "POST" })
+    .then(resp => resp.json())
+    .then(data => {
+        if(data.status === "success"){
+            location.reload();
+        } else {
+            alert("حدث خطأ أثناء الحذف!");
+        }
+    });
+};
 </script>
 
 </body>
