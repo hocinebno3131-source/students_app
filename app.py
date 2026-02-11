@@ -6,7 +6,7 @@ from collections import defaultdict
 app = Flask(__name__)
 
 CSV_FILE = "students.csv"
-ADMIN_PASSWORD = "admin123"   # ← يمكنك تغييره
+ADMIN_PASSWORD = "admin123"
 
 # -------------------------
 # صفحة الاستمارة للطلبة
@@ -35,14 +35,12 @@ def form():
 
     return render_template("form.html")
 
-
 # -------------------------
 # صفحة نجاح الإرسال
 # -------------------------
 @app.route("/success")
 def success():
     return "<h2>تم إرسال البيانات بنجاح ✅</h2>"
-
 
 # -------------------------
 # صفحة الأدمن المحمية مع فلاتر
@@ -83,13 +81,12 @@ def admin():
 
     return render_template(
         "admin.html",
-        grouped_students=grouped,
+        grouped=grouped,              # ← الاسم مطابق للقالب
         classes=classes,
         groups=groups,
         selected_class=selected_class,
         selected_group=selected_group
     )
-
 
 # -------------------------
 # تشغيل التطبيق
