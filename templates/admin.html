@@ -16,12 +16,21 @@
         button:hover { background: #0d47a1; }
         #downloadBtn { background: #43a047; }
         #downloadBtn:hover { background: #2e7d32; }
+        #printBtn { background: #f57c00; }
+        #printBtn:hover { background: #ef6c00; }
 
         table { width: 100%; border-collapse: collapse; margin-bottom: 35px; background: white; box-shadow: 0 3px 8px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
         th, td { padding: 12px 15px; text-align: center; }
         th { background: #1976d2; color: white; }
         tr:nth-child(even) { background: #f1f1f1; }
         .table-title { margin: 15px 0 5px 0; font-size: 18px; color: #333; font-weight: bold; }
+
+        /* فقط الجداول المرئية للطباعة */
+        @media print {
+            body * { visibility: hidden; }
+            #tablesContainer, #tablesContainer * { visibility: visible; }
+            #tablesContainer { position: absolute; left: 0; top: 0; width: 100%; }
+        }
     </style>
 </head>
 <body>
@@ -46,6 +55,7 @@
     <button onclick="applyFilter()">فلترة</button>
     <button onclick="showAll()">إظهار الكل</button>
     <a href="/download_excel"><button id="downloadBtn">⬇️ تنزيل Excel</button></a>
+    <button id="printBtn" onclick="printTables()">🖨️ طباعة</button>
 </div>
 
 <div id="tablesContainer">
@@ -89,13 +99,8 @@ function applyFilter() {
     tables.forEach(t => {
         const tableClass = t.dataset.class;
         const tableGroup = t.dataset.group;
-
-        if ((classVal === "" || tableClass === classVal) &&
-            (groupVal === "" || tableGroup === groupVal)) {
-            t.style.display = "block";
-        } else {
-            t.style.display = "none";
-        }
+        t.style.display = ( (classVal === "" || tableClass === classVal) &&
+                            (groupVal === "" || tableGroup === groupVal) ) ? "block" : "none";
     });
 }
 
@@ -104,6 +109,10 @@ function showAll() {
     tables.forEach(t => t.style.display = "block");
     document.getElementById("classFilter").value = "";
     document.getElementById("groupFilter").value = "";
+}
+
+function printTables() {
+    window.print();
 }
 </script>
 
