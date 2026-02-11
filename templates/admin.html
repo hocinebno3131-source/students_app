@@ -2,46 +2,72 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>لوحة الأدمن</title>
+    <title>صفحة الأدمن</title>
     <style>
-        body { font-family: "Segoe UI", Tahoma, Arial; margin: 20px; }
-        h2 { color: #1565c0; }
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h2 { color: #2e7d32; }
         table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-        th, td { border: 1px solid #aaa; padding: 8px; text-align: center; }
-        th { background: #1976d2; color: white; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+        th { background-color: #1976d2; color: white; }
+        .filter-box { margin-bottom: 20px; }
+        select, button { padding: 6px 10px; margin-left: 5px; }
+        button { cursor: pointer; }
     </style>
 </head>
 <body>
 
-<h1>لوحة الأدمن — عرض الطلاب</h1>
+<h2>🎛️ فلاتر الأدمن</h2>
 
-{% if grouped %}
-    {% for group_name, students in grouped.items() %}
-        <h2>{{ group_name }}</h2>
-        <table>
-            <tr>
-                <th>اللقب</th>
-                <th>الاسم</th>
-                <th>القسم</th>
-                <th>الفوج</th>
-                <th>الهاتف</th>
-                <th>ملاحظات</th>
-            </tr>
-            {% for s in students %}
-            <tr>
-                <td>{{ s.last_name }}</td>
-                <td>{{ s.first_name }}</td>
-                <td>{{ s.class }}</td>
-                <td>{{ s.group }}</td>
-                <td>{{ s.phone }}</td>
-                <td>{{ s.note }}</td>
-            </tr>
+<form method="POST">
+    <div class="filter-box">
+        <label>اختيار القسم:</label>
+        <select name="filter_class">
+            <option value="all" {% if selected_class=='all' %}selected{% endif %}>الكل</option>
+            {% for c in classes %}
+            <option value="{{ c }}" {% if selected_class==c %}selected{% endif %}>{{ c }}</option>
             {% endfor %}
-        </table>
-    {% endfor %}
-{% else %}
-    <p>لا توجد بيانات حالياً.</p>
-{% endif %}
+        </select>
+
+        <label>اختيار الفوج:</label>
+        <select name="filter_group">
+            <option value="all" {% if selected_group=='all' %}selected{% endif %}>الكل</option>
+            {% for g in groups %}
+            <option value="{{ g }}" {% if selected_group==g %}selected{% endif %}>{{ g }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">فلترة</button>
+        <button type="submit" name="filter_class" value="all">إظهار الكل</button>
+    </div>
+</form>
+
+{% for group_name, students in grouped_students.items() %}
+<h3>{{ group_name }}</h3>
+<table>
+    <thead>
+        <tr>
+            <th>اللقب</th>
+            <th>الاسم</th>
+            <th>القسم</th>
+            <th>الفوج</th>
+            <th>الهاتف</th>
+            <th>ملاحظات</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in students %}
+        <tr>
+            <td>{{ s.last_name }}</td>
+            <td>{{ s.first_name }}</td>
+            <td>{{ s.class }}</td>
+            <td>{{ s.group }}</td>
+            <td>{{ s.phone }}</td>
+            <td>{{ s.note }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endfor %}
 
 </body>
 </html>
