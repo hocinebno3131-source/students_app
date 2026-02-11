@@ -2,72 +2,170 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>صفحة الأدمن</title>
+    <title>لوحة الأدمن — عرض الطلبة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h2 { color: #2e7d32; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-        th { background-color: #1976d2; color: white; }
-        .filter-box { margin-bottom: 20px; }
-        select, button { padding: 6px 10px; margin-left: 5px; }
-        button { cursor: pointer; }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1976d2;
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        select, button {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        select {
+            background: #e0e0e0;
+        }
+
+        select:hover {
+            background: #d5d5d5;
+        }
+
+        button {
+            background: #1976d2;
+            color: white;
+        }
+
+        button:hover {
+            background: #0d47a1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 35px;
+            background: white;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: center;
+        }
+
+        th {
+            background: #1976d2;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f1f1f1;
+        }
+
+        .table-title {
+            margin: 15px 0 5px 0;
+            font-size: 18px;
+            color: #333;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
-<h2>🎛️ فلاتر الأدمن</h2>
+<h1>لوحة الأدمن — عرض الطلبة</h1>
 
-<form method="POST">
-    <div class="filter-box">
-        <label>اختيار القسم:</label>
-        <select name="filter_class">
-            <option value="all" {% if selected_class=='all' %}selected{% endif %}>الكل</option>
-            {% for c in classes %}
-            <option value="{{ c }}" {% if selected_class==c %}selected{% endif %}>{{ c }}</option>
-            {% endfor %}
-        </select>
-
-        <label>اختيار الفوج:</label>
-        <select name="filter_group">
-            <option value="all" {% if selected_group=='all' %}selected{% endif %}>الكل</option>
-            {% for g in groups %}
-            <option value="{{ g }}" {% if selected_group==g %}selected{% endif %}>{{ g }}</option>
-            {% endfor %}
-        </select>
-
-        <button type="submit">فلترة</button>
-        <button type="submit" name="filter_class" value="all">إظهار الكل</button>
-    </div>
-</form>
-
-{% for group_name, students in grouped_students.items() %}
-<h3>{{ group_name }}</h3>
-<table>
-    <thead>
-        <tr>
-            <th>اللقب</th>
-            <th>الاسم</th>
-            <th>القسم</th>
-            <th>الفوج</th>
-            <th>الهاتف</th>
-            <th>ملاحظات</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for s in students %}
-        <tr>
-            <td>{{ s.last_name }}</td>
-            <td>{{ s.first_name }}</td>
-            <td>{{ s.class }}</td>
-            <td>{{ s.group }}</td>
-            <td>{{ s.phone }}</td>
-            <td>{{ s.note }}</td>
-        </tr>
+<div class="filters">
+    <select id="classFilter">
+        <option value="">اختر القسم</option>
+        {% for c in classes %}
+        <option value="{{ c }}">{{ c }}</option>
         {% endfor %}
-    </tbody>
-</table>
-{% endfor %}
+    </select>
+
+    <select id="groupFilter">
+        <option value="">اختر الفوج</option>
+        {% for g in groups %}
+        <option value="{{ g }}">{{ g }}</option>
+        {% endfor %}
+    </select>
+
+    <button onclick="applyFilter()">فلترة</button>
+    <button onclick="showAll()">إظهار الكل</button>
+</div>
+
+<div id="tablesContainer">
+    {% for group_name, students in grouped.items() %}
+    <div class="table-wrapper" data-class="{{ group_name.split(' — ')[0] }}" data-group="{{ group_name.split(' — ')[1] }}">
+        <div class="table-title">{{ group_name }}</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>اللقب</th>
+                    <th>الاسم</th>
+                    <th>القسم</th>
+                    <th>الفوج</th>
+                    <th>الهاتف</th>
+                    <th>ملاحظة</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in students %}
+                <tr>
+                    <td>{{ s['last_name'] }}</td>
+                    <td>{{ s['first_name'] }}</td>
+                    <td>{{ s['class'] }}</td>
+                    <td>{{ s['group'] }}</td>
+                    <td>{{ s['phone'] }}</td>
+                    <td>{{ s['note'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+function applyFilter() {
+    const classVal = document.getElementById("classFilter").value;
+    const groupVal = document.getElementById("groupFilter").value;
+    const tables = document.querySelectorAll(".table-wrapper");
+
+    tables.forEach(t => {
+        const tableClass = t.dataset.class;
+        const tableGroup = t.dataset.group;
+
+        if ((classVal === "" || tableClass === classVal) &&
+            (groupVal === "" || tableGroup === groupVal)) {
+            t.style.display = "block";
+        } else {
+            t.style.display = "none";
+        }
+    });
+}
+
+function showAll() {
+    const tables = document.querySelectorAll(".table-wrapper");
+    tables.forEach(t => t.style.display = "block");
+    document.getElementById("classFilter").value = "";
+    document.getElementById("groupFilter").value = "";
+}
+</script>
 
 </body>
 </html>
