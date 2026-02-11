@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, jsonify
 import csv
 import os
 from collections import defaultdict
@@ -9,17 +9,12 @@ CSV_FILE = "students.csv"
 ADMIN_PASSWORD = "admin123"
 
 # -------------------------
-# قراءة كل الطلبة
-# -------------------------
 def read_students():
     if not os.path.exists(CSV_FILE):
         return []
     with open(CSV_FILE, newline="", encoding="utf-8-sig") as f:
         return list(csv.DictReader(f, delimiter=";"))
 
-# -------------------------
-# إعادة كتابة الملف بعد الحذف
-# -------------------------
 def write_students(students):
     with open(CSV_FILE, "w", newline="", encoding="utf-8-sig") as f:
         fieldnames = ["last_name","first_name","class","group","phone","note"]
@@ -27,8 +22,6 @@ def write_students(students):
         writer.writeheader()
         writer.writerows(students)
 
-# -------------------------
-# صفحة الاستمارة + منع التكرار
 # -------------------------
 @app.route("/", methods=["GET", "POST"])
 def form():
@@ -43,7 +36,6 @@ def form():
 
         students = read_students()
 
-        # منع التكرار
         for s in students:
             if (
                 s["last_name"] == last_name and
@@ -53,14 +45,12 @@ def form():
             ):
                 return redirect("/?duplicate=1")
 
-        data = [last_name, first_name, class_name, group, phone, note]
-
         file_exists = os.path.exists(CSV_FILE)
         with open(CSV_FILE, "a", newline="", encoding="utf-8-sig") as f:
             writer = csv.writer(f, delimiter=";")
             if not file_exists:
                 writer.writerow(["last_name","first_name","class","group","phone","note"])
-            writer.writerow(data)
+            writer.writerow([last_name, first_name, class_name, group, phone, note])
 
         return redirect("/success")
 
@@ -71,8 +61,6 @@ def form():
 def success():
     return "<h2>تم إرسال البيانات بنجاح ✅</h2>"
 
-# -------------------------
-# صفحة الأدمن
 # -------------------------
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
@@ -87,8 +75,6 @@ def admin():
     students = read_students()
 
     grouped = defaultdict(list)
-
-    # نضيف index لكل طالب (مهم للحذف)
     for i, s in enumerate(students):
         s["_index"] = i
         key = f"{s['class']} — {s['group']}"
@@ -107,15 +93,16 @@ def admin():
     )
 
 # -------------------------
-# مسار حذف طالب
+# حذف AJAX
 # -------------------------
-@app.route("/delete/<int:index>")
+@app.route("/delete/<int:index>", methods=["POST"])
 def delete_student(index):
     students = read_students()
     if 0 <= index < len(students):
         students.pop(index)
         write_students(students)
-    return redirect("/admin")
+        return jsonify({"status": "ok"})
+    return jsonify({"status": "error"}), 400
 
 # -------------------------
 if __name__ == "__main__":
