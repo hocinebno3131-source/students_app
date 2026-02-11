@@ -6,7 +6,7 @@ from collections import defaultdict
 app = Flask(__name__)
 
 CSV_FILE = "students.csv"
-ADMIN_PASSWORD = "admin123"  # كلمة مرور الأدمن
+ADMIN_PASSWORD = "admin123"   # ← يمكنك تغييره
 
 # -------------------------
 # صفحة الاستمارة للطلبة
@@ -45,7 +45,7 @@ def success():
 
 
 # -------------------------
-# صفحة الأدمن المحمية
+# صفحة الأدمن المحمية مع فلاتر
 # -------------------------
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
@@ -66,20 +66,28 @@ def admin():
             reader = csv.DictReader(f, delimiter=";")
             students = list(reader)
 
+    # الحصول على الفلاتر من POST
+    selected_class = request.form.get("filter_class", "all")
+    selected_group = request.form.get("filter_group", "all")
+
     # تقسيم حسب القسم + الفوج
     grouped = defaultdict(list)
     for s in students:
-        key = f"{s['class']} — {s['group']}"
-        grouped[key].append(s)
+        if (selected_class == "all" or s["class"] == selected_class) and \
+           (selected_group == "all" or s["group"] == selected_group):
+            key = f"{s['class']} — {s['group']}"
+            grouped[key].append(s)
 
     classes = sorted({s['class'] for s in students})
     groups = sorted({s['group'] for s in students})
 
     return render_template(
         "admin.html",
-        grouped=grouped,
+        grouped_students=grouped,
         classes=classes,
-        groups=groups
+        groups=groups,
+        selected_class=selected_class,
+        selected_group=selected_group
     )
 
 
