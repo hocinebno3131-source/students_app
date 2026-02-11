@@ -6,7 +6,7 @@ from collections import defaultdict
 app = Flask(__name__)
 
 CSV_FILE = "students.csv"
-ADMIN_PASSWORD = "admin123"   # ← يمكنك تغييرها
+ADMIN_PASSWORD = "admin123"   # يمكنك تغييرها
 
 # -------------------------
 # صفحة الاستمارة للطلبة
@@ -29,7 +29,9 @@ def form():
             writer = csv.writer(f, delimiter=";")
 
             if not file_exists:
-                writer.writerow(["last_name","first_name","class","group","phone","note"])
+                writer.writerow([
+                    "last_name","first_name","class","group","phone","note"
+                ])
 
             writer.writerow(data)
 
@@ -52,32 +54,45 @@ def success():
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
 
-    # عرض نموذج كلمة المرور أولاً
+    # عرض صفحة كلمة المرور
     if request.method == "GET":
         return render_template("admin_password.html", message="")
 
-    # التحقق من كلمة المرور
     password = request.form.get("password")
 
     if password != ADMIN_PASSWORD:
-        return render_template("admin_password.html", message="كلمة المرور غير صحيحة ❌")
+        return render_template(
+            "admin_password.html",
+            message="كلمة المرور غير صحيحة ❌"
+        )
 
-    # ===== كلمة المرور صحيحة → عرض الجداول =====
+    # ===== بعد نجاح كلمة المرور =====
 
     students = []
+
     if os.path.exists(CSV_FILE):
         with open(CSV_FILE, newline="", encoding="utf-8-sig") as f:
             reader = csv.DictReader(f, delimiter=";")
-            students = list(reader)
+            for row in reader:
+                students.append(row)
 
-    # تقسيم حسب القسم + الفوج
+    # تقسيم حسب القسم + الفوج بشكل آمن
     grouped = defaultdict(list)
+
     for s in students:
-        key = f"{s['class']} — {s['group']}"
+        cls = s.get("class", "غير محدد")
+        grp = s.get("group", "غير محدد")
+        key = f"{cls} — {grp}"
         grouped[key].append(s)
 
-    classes = sorted({s['class'] for s in students})
-    groups = sorted({s['group'] for s in students})
+    # قوائم الفلترة بشكل آمن
+    classes = sorted({
+        s.get("class") for s in students if s.get("class")
+    })
+
+    groups = sorted({
+        s.get("group") for s in students if s.get("group")
+    })
 
     return render_template(
         "admin.html",
