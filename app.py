@@ -6,18 +6,7 @@ from collections import defaultdict
 app = Flask(__name__)
 
 CSV_FILE = "students.csv"
-ADMIN_PASSWORD = "admin123"   # كلمة مرور الأدمن
-
-# -------------------------
-# دالة مساعدة لقراءة الطلاب
-# -------------------------
-def load_students():
-    students = []
-    if os.path.exists(CSV_FILE):
-        with open(CSV_FILE, newline="", encoding="utf-8-sig") as f:
-            reader = csv.DictReader(f, delimiter=";")
-            students = list(reader)
-    return students
+ADMIN_PASSWORD = "admin123"  # كلمة مرور الأدمن
 
 # -------------------------
 # صفحة الاستمارة للطلبة
@@ -25,30 +14,27 @@ def load_students():
 @app.route("/", methods=["GET", "POST"])
 def form():
     if request.method == "POST":
-        data = {
-            "last_name": request.form["last_name"],
-            "first_name": request.form["first_name"],
-            "section": request.form["section"],
-            "group": request.form["group"],
-            "phone": request.form["phone"],
-            "note": request.form["note"]
-        }
+        data = [
+            request.form["last_name"],
+            request.form["first_name"],
+            request.form["class"],
+            request.form["group"],
+            request.form["phone"],
+            request.form["note"]
+        ]
 
         file_exists = os.path.exists(CSV_FILE)
 
         with open(CSV_FILE, "a", newline="", encoding="utf-8-sig") as f:
-            writer = csv.DictWriter(f, fieldnames=data.keys(), delimiter=";")
+            writer = csv.writer(f, delimiter=";")
             if not file_exists:
-                writer.writeheader()
+                writer.writerow(["last_name","first_name","class","group","phone","note"])
             writer.writerow(data)
 
         return redirect("/success")
 
-    # خيارات الأقسام والفوج
-    sections = [f"أولى علوم{i}" for i in range(1, 8)]
-    groups = ["الفوج1", "الفوج2"]
+    return render_template("form.html")
 
-    return render_template("form.html", sections=sections, groups=groups)
 
 # -------------------------
 # صفحة نجاح الإرسال
@@ -57,45 +43,45 @@ def form():
 def success():
     return "<h2>تم إرسال البيانات بنجاح ✅</h2>"
 
+
 # -------------------------
 # صفحة الأدمن المحمية
 # -------------------------
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
-    if request.method == "POST":
-        password = request.form.get("password")
-        if password != ADMIN_PASSWORD:
-            return render_template("admin_login.html", message="كلمة المرور غير صحيحة ❌")
 
-        # تصفية (اختياري)
-        section_filter = request.form.get("section")
-        group_filter = request.form.get("group")
+    # عرض نموذج كلمة المرور أولاً
+    if request.method == "GET":
+        return render_template("admin_password.html", message="")
 
-        students = load_students()
+    # التحقق من كلمة المرور
+    password = request.form.get("password")
+    if password != ADMIN_PASSWORD:
+        return render_template("admin_password.html", message="كلمة المرور غير صحيحة ❌")
 
-        if section_filter and section_filter != "all":
-            students = [s for s in students if s["section"] == section_filter]
+    # ===== كلمة المرور صحيحة → عرض الجداول =====
+    students = []
+    if os.path.exists(CSV_FILE):
+        with open(CSV_FILE, newline="", encoding="utf-8-sig") as f:
+            reader = csv.DictReader(f, delimiter=";")
+            students = list(reader)
 
-        if group_filter and group_filter != "all":
-            students = [s for s in students if s["group"] == group_filter]
+    # تقسيم حسب القسم + الفوج
+    grouped = defaultdict(list)
+    for s in students:
+        key = f"{s['class']} — {s['group']}"
+        grouped[key].append(s)
 
-        # تجميع حسب الفوج
-        grouped_students = defaultdict(list)
-        for s in students:
-            g = s["group"]
-            grouped_students[g].append(s)
+    classes = sorted({s['class'] for s in students})
+    groups = sorted({s['group'] for s in students})
 
-        return render_template(
-            "admin.html",
-            grouped_students=grouped_students,
-            sections=[f"أولى علوم{i}" for i in range(1,8)],
-            groups=["الفوج1","الفوج2"],
-            selected_section=section_filter,
-            selected_group=group_filter
-        )
+    return render_template(
+        "admin.html",
+        grouped=grouped,
+        classes=classes,
+        groups=groups
+    )
 
-    # GET → عرض صفحة تسجيل الدخول للأدمن
-    return render_template("admin_login.html", message="")
 
 # -------------------------
 # تشغيل التطبيق
