@@ -1,7 +1,9 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, send_file
 import csv
 import os
 from collections import defaultdict
+import pandas as pd
+from io import BytesIO
 
 app = Flask(__name__)
 
@@ -47,28 +49,22 @@ def success():
 # -------------------------
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
-
-    # عرض نموذج كلمة المرور أولاً
     if request.method == "GET":
         return render_template("admin_password.html", message="")
 
-    # التحقق من كلمة المرور
     password = request.form.get("password")
     if password != ADMIN_PASSWORD:
         return render_template("admin_password.html", message="كلمة المرور غير صحيحة ❌")
 
-    # ===== كلمة المرور صحيحة → عرض الجداول =====
     students = []
     if os.path.exists(CSV_FILE):
         with open(CSV_FILE, newline="", encoding="utf-8-sig") as f:
             reader = csv.DictReader(f, delimiter=";")
             students = list(reader)
 
-    # الحصول على الفلاتر من POST
     selected_class = request.form.get("filter_class", "all")
     selected_group = request.form.get("filter_group", "all")
 
-    # تقسيم حسب القسم + الفوج
     grouped = defaultdict(list)
     for s in students:
         if (selected_class == "all" or s["class"] == selected_class) and \
@@ -81,12 +77,34 @@ def admin():
 
     return render_template(
         "admin.html",
-        grouped=grouped,              # ← الاسم مطابق للقالب
+        grouped=grouped,
         classes=classes,
         groups=groups,
         selected_class=selected_class,
         selected_group=selected_group
     )
+
+# -------------------------
+# مسار تنزيل Excel
+# -------------------------
+@app.route("/download_excel")
+def download_excel():
+    if not os.path.exists(CSV_FILE):
+        return "لا يوجد بيانات للتنزيل."
+
+    df = pd.read_csv(CSV_FILE, delimiter=";", encoding="utf-8-sig")
+
+    # إنشاء ملف Excel في الذاكرة
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
+        df.to_excel(writer, index=False, sheet_name="Students")
+        writer.save()
+    output.seek(0)
+
+    return send_file(output,
+                     download_name="students.xlsx",
+                     as_attachment=True,
+                     mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 # -------------------------
 # تشغيل التطبيق
