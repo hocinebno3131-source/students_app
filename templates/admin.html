@@ -4,19 +4,20 @@
     <meta charset="UTF-8">
     <title>لوحة الأدمن</title>
     <style>
-        body { font-family: "Segoe UI", Tahoma, Arial; background: #f0f2f5; margin: 20px; }
-        h2 { color: #1565c0; margin-bottom: 15px; }
+        body { font-family: "Segoe UI", Tahoma, Arial; margin: 20px; }
+        h2 { color: #1565c0; }
         table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+        th, td { border: 1px solid #aaa; padding: 8px; text-align: center; }
         th { background: #1976d2; color: white; }
-        .group-title { font-size: 18px; margin-top: 25px; color: #d32f2f; }
     </style>
 </head>
 <body>
-    <h1>لوحة إدارة الطلبة</h1>
 
+<h1>لوحة الأدمن — عرض الطلاب</h1>
+
+{% if grouped %}
     {% for group_name, students in grouped.items() %}
-        <div class="group-title">{{ group_name }}</div>
+        <h2>{{ group_name }}</h2>
         <table>
             <tr>
                 <th>اللقب</th>
@@ -24,20 +25,23 @@
                 <th>القسم</th>
                 <th>الفوج</th>
                 <th>الهاتف</th>
-                <th>ملاحظة</th>
+                <th>ملاحظات</th>
             </tr>
-            {% for student in students %}
+            {% for s in students %}
             <tr>
-                <td>{{ student['last_name'] }}</td>
-                <td>{{ student['first_name'] }}</td>
-                <td>{{ student['class'] }}</td>
-                <td>{{ student['group'] }}</td>
-                <td>{{ student['phone'] }}</td>
-                <td>{{ student['note'] }}</td>
+                <td>{{ s.last_name }}</td>
+                <td>{{ s.first_name }}</td>
+                <td>{{ s.class }}</td>
+                <td>{{ s.group }}</td>
+                <td>{{ s.phone }}</td>
+                <td>{{ s.note }}</td>
             </tr>
             {% endfor %}
         </table>
     {% endfor %}
+{% else %}
+    <p>لا توجد بيانات حالياً.</p>
+{% endif %}
 
 </body>
 </html>
