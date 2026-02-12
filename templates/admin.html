@@ -1,122 +1,169 @@
-from flask import Flask, render_template, request, redirect
-import csv
-import os
-from collections import defaultdict
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>لوحة الأدمن — عرض الطلبة</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 
-app = Flask(__name__)
+<style>
+body { font-family: 'Cairo', sans-serif; background: #f4f6f9; margin: 0; padding: 20px; color: #333; }
+h1 { text-align: center; color: #1976d2; }
 
-CSV_FILE = "students.csv"
-ADMIN_PASSWORD = "admin123"
+.filters { display: flex; gap: 15px; justify-content: center; margin-bottom: 25px; flex-wrap: wrap; }
 
-# -------------------------
-# قراءة كل الطلبة
-# -------------------------
-def read_students():
-    if not os.path.exists(CSV_FILE):
-        return []
-    with open(CSV_FILE, newline="", encoding="utf-8-sig") as f:
-        return list(csv.DictReader(f, delimiter=";"))
+select, button {
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
 
-# -------------------------
-# إعادة كتابة الملف بعد الحذف
-# -------------------------
-def write_students(students):
-    with open(CSV_FILE, "w", newline="", encoding="utf-8-sig") as f:
-        fieldnames = ["last_name","first_name","class","group","phone","note"]
-        writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter=";")
-        writer.writeheader()
-        writer.writerows(students)
+select { background: #e0e0e0; }
+select:hover { background: #d5d5d5; }
 
-# -------------------------
-# صفحة الاستمارة + منع التكرار
-# -------------------------
-@app.route("/", methods=["GET", "POST"])
-def form():
-    duplicate = request.args.get("duplicate", "")
-    if request.method == "POST":
-        last_name = request.form["last_name"].strip()
-        first_name = request.form["first_name"].strip()
-        class_name = request.form["class"].strip()
-        group = request.form["group"].strip()
-        phone = request.form["phone"].strip()
-        note = request.form["note"].strip()
+button { background: #1976d2; color: white; }
+button:hover { background: #0d47a1; }
 
-        students = read_students()
+#printBtn { background: #f57c00; }
+#printBtn:hover { background: #ef6c00; }
 
-        # منع التكرار
-        for s in students:
-            if (
-                s["last_name"] == last_name and
-                s["first_name"] == first_name and
-                s["class"] == class_name and
-                s["group"] == group
-            ):
-                return redirect("/?duplicate=1")
+.delete-btn {
+    background: #e53935;
+    padding: 6px 10px;
+    font-size: 14px;
+}
+.delete-btn:hover {
+    background: #b71c1c;
+}
 
-        data = [last_name, first_name, class_name, group, phone, note]
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 35px;
+    background: white;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
 
-        file_exists = os.path.exists(CSV_FILE)
-        with open(CSV_FILE, "a", newline="", encoding="utf-8-sig") as f:
-            writer = csv.writer(f, delimiter=";")
-            if not file_exists:
-                writer.writerow(["last_name","first_name","class","group","phone","note"])
-            writer.writerow(data)
+th, td { padding: 12px 15px; text-align: center; }
+th { background: #1976d2; color: white; }
+tr:nth-child(even) { background: #f1f1f1; }
 
-        return redirect("/success")
+.table-title {
+    margin: 15px 0 5px 0;
+    font-size: 18px;
+    font-weight: bold;
+}
 
-    return render_template("form.html", duplicate=duplicate)
+@media print {
+    body * { visibility: hidden; }
+    #tablesContainer, #tablesContainer * { visibility: visible; }
+    #tablesContainer { position: absolute; left: 0; top: 0; width: 100%; }
+}
+</style>
+</head>
 
-# -------------------------
-@app.route("/success")
-def success():
-    return render_template("success.html")
+<body>
 
-# -------------------------
-# صفحة الأدمن
-# -------------------------
-@app.route("/admin", methods=["GET", "POST"])
-def admin():
+<h1>لوحة الأدمن — عرض الطلبة</h1>
 
-    if request.method == "GET":
-        return render_template("admin_password.html", message="")
+<div class="filters">
+<select id="classFilter">
+<option value="">اختر القسم</option>
+{% for c in classes %}
+<option value="{{ c }}">{{ c }}</option>
+{% endfor %}
+</select>
 
-    password = request.form.get("password")
-    if password != ADMIN_PASSWORD:
-        return render_template("admin_password.html", message="كلمة المرور غير صحيحة ❌")
+<select id="groupFilter">
+<option value="">اختر الفوج</option>
+{% for g in groups %}
+<option value="{{ g }}">{{ g }}</option>
+{% endfor %}
+</select>
 
-    students = read_students()
-    grouped = defaultdict(list)
+<button onclick="applyFilter()">فلترة</button>
+<button onclick="showAll()">إظهار الكل</button>
+<button id="printBtn" onclick="printTables()">🖨️ طباعة</button>
+</div>
 
-    # نضيف index لكل طالب (مهم للحذف)
-    for i, s in enumerate(students):
-        s["_index"] = i
-        key = f"{s['class']} — {s['group']}"
-        grouped[key].append(s)
+<div id="tablesContainer">
+{% for group_name, students in grouped.items() %}
+<div class="table-wrapper"
+     data-class="{{ group_name.split(' — ')[0] }}"
+     data-group="{{ group_name.split(' — ')[1] }}">
 
-    classes = sorted({s['class'] for s in students})
-    groups = sorted({s['group'] for s in students})
+<div class="table-title">{{ group_name }}</div>
 
-    return render_template(
-        "admin.html",
-        grouped=grouped,
-        classes=classes,
-        groups=groups,
-        selected_class="",
-        selected_group=""
-    )
+<table>
+<thead>
+<tr>
+<th>اللقب</th>
+<th>الاسم</th>
+<th>القسم</th>
+<th>الفوج</th>
+<th>الهاتف</th>
+<th>ملاحظة</th>
+<th>حذف</th>
+</tr>
+</thead>
 
-# -------------------------
-# مسار حذف طالب
-# -------------------------
-@app.route("/delete/<int:index>")
-def delete_student(index):
-    students = read_students()
-    if 0 <= index < len(students):
-        students.pop(index)
-        write_students(students)
-    return redirect("/admin")
+<tbody>
+{% for s in students %}
+<tr>
+<td>{{ s['last_name'] }}</td>
+<td>{{ s['first_name'] }}</td>
+<td>{{ s['class'] }}</td>
+<td>{{ s['group'] }}</td>
+<td>{{ s['phone'] }}</td>
+<td>{{ s['note'] }}</td>
+<td>
+<button class="delete-btn"
+onclick="confirmDelete({{ s['_index'] }})">
+🗑 حذف
+</button>
+</td>
+</tr>
+{% endfor %}
+</tbody>
 
-# -------------------------
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+</table>
+</div>
+{% endfor %}
+</div>
+
+<script>
+function applyFilter() {
+    const classVal = document.getElementById("classFilter").value;
+    const groupVal = document.getElementById("groupFilter").value;
+
+    document.querySelectorAll(".table-wrapper").forEach(t => {
+        t.style.display =
+        ((classVal === "" || t.dataset.class === classVal) &&
+         (groupVal === "" || t.dataset.group === groupVal))
+         ? "block" : "none";
+    });
+}
+
+function showAll() {
+    document.querySelectorAll(".table-wrapper").forEach(t => t.style.display="block");
+    classFilter.value="";
+    groupFilter.value="";
+}
+
+function printTables() {
+    window.print();
+}
+
+function confirmDelete(index) {
+    if (confirm("هل أنت متأكد من حذف هذا الطالب؟")) {
+        window.location.href = "/delete/" + index;
+    }
+}
+</script>
+
+</body>
+</html>
