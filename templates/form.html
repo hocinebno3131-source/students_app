@@ -35,11 +35,16 @@
             border: 1px solid #90caf9; 
             font-size: 16px; 
             text-align: center; 
+            transition: 0.3s; 
         }
         input:focus, select:focus {
             border-color: #0d47a1; 
-            outline: none; 
             box-shadow: 0 0 5px rgba(13,71,161,0.5);
+            outline: none; 
+        }
+        .invalid { 
+            border-color: #e53935 !important; 
+            box-shadow: 0 0 5px rgba(229,57,53,0.5) !important; 
         }
         button { 
             width: 100%; 
@@ -100,18 +105,28 @@
     </div>
 
     <script>
-        document.getElementById("studentForm").addEventListener("submit", function(e) {
+        const form = document.getElementById("studentForm");
+        const errorMsg = document.getElementById("errorMsg");
+
+        form.addEventListener("submit", function(e) {
             const arabicRegex = /^[\u0600-\u06FF\s]+$/;
+            let valid = true;
 
-            const lastName = this["last_name"].value.trim();
-            const firstName = this["first_name"].value.trim();
-            const note = this["note"].value.trim();
+            ["last_name", "first_name", "note"].forEach(name => {
+                const field = form[name];
+                if (!field.value.trim() || (field.value.trim() && !arabicRegex.test(field.value.trim()))) {
+                    field.classList.add("invalid");
+                    valid = false;
+                } else {
+                    field.classList.remove("invalid");
+                }
+            });
 
-            if (!arabicRegex.test(lastName) || !arabicRegex.test(firstName) || (note && !arabicRegex.test(note))) {
+            if (!valid) {
                 e.preventDefault();
-                document.getElementById("errorMsg").style.display = "block";
+                errorMsg.style.display = "block";
             } else {
-                document.getElementById("errorMsg").style.display = "none";
+                errorMsg.style.display = "none";
             }
         });
     </script>
