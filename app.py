@@ -42,14 +42,16 @@ def form():
 
         students = read_students()
 
-        # منع التكرار
+        # التحقق من التكرار في قاعدة البيانات
         for s in students:
             if (s["last_name"] == last_name and
                 s["first_name"] == first_name and
                 s["class"] == class_name and
                 s["group"] == group):
+                # الطالب موجود مسبقًا، إعادة مع باراميتر duplicate=1
                 return redirect("/?duplicate=1")
 
+        # إذا لم يكن موجود، نضيف الطالب
         data = [last_name, first_name, class_name, group, phone, note]
 
         file_exists = os.path.exists(CSV_FILE)
