@@ -73,7 +73,7 @@ input:focus, select:focus {
 }
 
 /* --- نافذة التحذير --- */
-#arabicModal {
+#duplicateModal {
     display: none;
     position: fixed;
     top: 0; left: 0; right:0; bottom:0;
@@ -82,7 +82,7 @@ input:focus, select:focus {
     align-items: center;
     z-index: 1000;
 }
-#arabicModal .modal-content {
+#duplicateModal .modal-content {
     background: #ffeb3b; /* لون الجيلو */
     padding: 25px;
     border-radius: 12px;
@@ -92,7 +92,7 @@ input:focus, select:focus {
     font-size: 18px;
     font-weight: bold;
 }
-#arabicModal .modal-content button {
+#duplicateModal .modal-content button {
     margin-top: 15px;
     padding: 10px 20px;
     font-size: 16px;
@@ -102,11 +102,11 @@ input:focus, select:focus {
     cursor: pointer;
     transition: 0.3s;
 }
-#arabicModal .modal-content button#closeModal {
+#duplicateModal .modal-content button#closeModal {
     background: #f44336; /* أحمر لإغلاق */
     color: white;
 }
-#arabicModal .modal-content button#closeModal:hover {
+#duplicateModal .modal-content button#closeModal:hover {
     background: #d32f2f;
 }
 </style>
@@ -147,17 +147,22 @@ input:focus, select:focus {
     </form>
 </div>
 
-<!-- نافذة الكتابة بالعربية -->
-<div id="arabicModal">
+<!-- نافذة الطالب موجود -->
+<div id="duplicateModal">
     <div class="modal-content">
-        الرجاء كتابة المعلومات بالعربية فقط! ❌
+        هذا الطالب موجود بالفعل! ❌
         <br>
-        <button id="closeModal" onclick="closeArabicModal()">إغلاق</button>
+        <button id="closeModal" onclick="closeDuplicateModal()">إغلاق</button>
     </div>
 </div>
 
 <script>
-// التحقق من أن الحقول مكتوبة بالعربية
+// هنا يجب أن يحتوي الباكند على مصفوفة الطلاب الحالية
+const existingStudents = [
+    // مثال: {last_name:"بن علي", first_name:"أحمد", class:"أولى علوم1"}
+];
+
+// تحقق من أن الحقول مكتوبة بالعربية
 function isArabic(text) {
     return /^[\u0600-\u06FF\s]+$/.test(text);
 }
@@ -165,16 +170,28 @@ function isArabic(text) {
 document.getElementById("studentForm").addEventListener("submit", function(e){
     const lastName = this.last_name.value.trim();
     const firstName = this.first_name.value.trim();
-    const note = this.note.value.trim();
+    const classVal = this.class.value;
 
-    if(!isArabic(lastName) || !isArabic(firstName) || (note && !isArabic(note))) {
-        e.preventDefault(); // منع الإرسال
-        document.getElementById("arabicModal").style.display = "flex";
+    // تحقق من العربية
+    if(!isArabic(lastName) || !isArabic(firstName)) {
+        e.preventDefault();
+        alert("الرجاء كتابة المعلومات بالعربية فقط!");
+        return;
+    }
+
+    // تحقق من الازدواجية
+    const duplicate = existingStudents.some(s => 
+        s.last_name === lastName && s.first_name === firstName && s.class === classVal
+    );
+
+    if(duplicate) {
+        e.preventDefault();
+        document.getElementById("duplicateModal").style.display = "flex";
     }
 });
 
-function closeArabicModal() {
-    document.getElementById("arabicModal").style.display = "none";
+function closeDuplicateModal() {
+    document.getElementById("duplicateModal").style.display = "none";
 }
 </script>
 
