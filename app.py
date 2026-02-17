@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, jsonify
 import csv
 import os
 from collections import defaultdict
@@ -18,7 +18,7 @@ def read_students():
         return list(csv.DictReader(f, delimiter=";"))
 
 # -------------------------
-# إعادة كتابة الملف بعد الحذف
+# إعادة كتابة الملف بعد الحذف أو التعديل
 # -------------------------
 def write_students(students):
     with open(CSV_FILE, "w", newline="", encoding="utf-8-sig") as f:
@@ -28,12 +28,11 @@ def write_students(students):
         writer.writerows(students)
 
 # -------------------------
-# صفحة الاستمارة + منع التكرار
+# صفحة الاستمارة
 # -------------------------
 @app.route("/", methods=["GET", "POST"])
 def form():
     if request.method == "POST":
-
         last_name = request.form["last_name"].strip()
         first_name = request.form["first_name"].strip()
         class_name = request.form["class"].strip()
@@ -45,12 +44,10 @@ def form():
 
         # منع التكرار
         for s in students:
-            if (
-                s["last_name"] == last_name and
+            if (s["last_name"] == last_name and
                 s["first_name"] == first_name and
                 s["class"] == class_name and
-                s["group"] == group
-            ):
+                s["group"] == group):
                 return redirect("/?duplicate=1")
 
         data = [last_name, first_name, class_name, group, phone, note]
@@ -76,7 +73,6 @@ def success():
 # -------------------------
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
-
     if request.method == "GET":
         return render_template("admin_password.html", message="")
 
@@ -85,7 +81,6 @@ def admin():
         return render_template("admin_password.html", message="كلمة المرور غير صحيحة ❌")
 
     students = read_students()
-
     grouped = defaultdict(list)
 
     # نضيف index لكل طالب (مهم للحذف)
@@ -107,15 +102,17 @@ def admin():
     )
 
 # -------------------------
-# مسار حذف طالب
+# مسار حذف طالب (لـ AJAX)
 # -------------------------
-@app.route("/delete/<int:index>")
-def delete_student(index):
+@app.route("/delete_student", methods=["POST"])
+def delete_student_ajax():
+    index = int(request.form.get("index", -1))
     students = read_students()
     if 0 <= index < len(students):
         students.pop(index)
         write_students(students)
-    return redirect("/admin")
+        return jsonify({"status": "success"})
+    return jsonify({"status": "error"})
 
 # -------------------------
 if __name__ == "__main__":
