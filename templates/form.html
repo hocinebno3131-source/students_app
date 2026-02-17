@@ -72,7 +72,7 @@ input:focus, select:focus {
     background: #616161; 
 }
 
-/* --- نافذة التحذير --- */
+/* --- نافذة الطالب موجود --- */
 #duplicateModal {
     display: none;
     position: fixed;
@@ -91,6 +91,7 @@ input:focus, select:focus {
     box-shadow: 0 8px 20px rgba(0,0,0,0.3);
     font-size: 18px;
     font-weight: bold;
+    color: #b71c1c;
 }
 #duplicateModal .modal-content button {
     margin-top: 15px;
@@ -101,13 +102,11 @@ input:focus, select:focus {
     border-radius: 8px;
     cursor: pointer;
     transition: 0.3s;
-}
-#duplicateModal .modal-content button#closeModal {
-    background: #f44336; /* أحمر لإغلاق */
+    background: #b71c1c;
     color: white;
 }
-#duplicateModal .modal-content button#closeModal:hover {
-    background: #d32f2f;
+#duplicateModal .modal-content button:hover {
+    background: #7f0000;
 }
 </style>
 </head>
@@ -150,42 +149,17 @@ input:focus, select:focus {
 <!-- نافذة الطالب موجود -->
 <div id="duplicateModal">
     <div class="modal-content">
-        هذا الطالب موجود بالفعل! ❌
+        هذا الطالب موجود مسبقًا ❌
         <br>
         <button id="closeModal" onclick="closeDuplicateModal()">إغلاق</button>
     </div>
 </div>
 
 <script>
-// هنا يجب أن يحتوي الباكند على مصفوفة الطلاب الحالية
-const existingStudents = [
-    // مثال: {last_name:"بن علي", first_name:"أحمد", class:"أولى علوم1"}
-];
-
-// تحقق من أن الحقول مكتوبة بالعربية
-function isArabic(text) {
-    return /^[\u0600-\u06FF\s]+$/.test(text);
-}
-
-document.getElementById("studentForm").addEventListener("submit", function(e){
-    const lastName = this.last_name.value.trim();
-    const firstName = this.first_name.value.trim();
-    const classVal = this.class.value;
-
-    // تحقق من العربية
-    if(!isArabic(lastName) || !isArabic(firstName)) {
-        e.preventDefault();
-        alert("الرجاء كتابة المعلومات بالعربية فقط!");
-        return;
-    }
-
-    // تحقق من الازدواجية
-    const duplicate = existingStudents.some(s => 
-        s.last_name === lastName && s.first_name === firstName && s.class === classVal
-    );
-
-    if(duplicate) {
-        e.preventDefault();
+// إظهار النافذة إذا وصلنا باراميتر duplicate=1 من الباكند
+window.addEventListener("DOMContentLoaded", () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if(urlParams.get("duplicate") === "1") {
         document.getElementById("duplicateModal").style.display = "flex";
     }
 });
