@@ -57,10 +57,12 @@ tr:nth-child(even) { background: #f1f1f1; }
     font-weight: bold;
 }
 
+/* --------- التعديل: إخفاء عمود الحذف عند الطباعة --------- */
 @media print {
     body * { visibility: hidden; }
     #tablesContainer, #tablesContainer * { visibility: visible; }
     #tablesContainer { position: absolute; left: 0; top: 0; width: 100%; }
+    th:last-child, td:last-child { display: none; }
 }
 
 /* ----- نافذة الحذف المنبثقة ----- */
