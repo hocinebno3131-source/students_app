@@ -73,7 +73,7 @@ input:focus, select:focus {
 }
 
 /* --- نافذة التحذير --- */
-#duplicateModal {
+#arabicModal {
     display: none;
     position: fixed;
     top: 0; left: 0; right:0; bottom:0;
@@ -82,7 +82,7 @@ input:focus, select:focus {
     align-items: center;
     z-index: 1000;
 }
-#duplicateModal .modal-content {
+#arabicModal .modal-content {
     background: #ffeb3b; /* لون الجيلو */
     padding: 25px;
     border-radius: 12px;
@@ -92,7 +92,7 @@ input:focus, select:focus {
     font-size: 18px;
     font-weight: bold;
 }
-#duplicateModal .modal-content button {
+#arabicModal .modal-content button {
     margin-top: 15px;
     padding: 10px 20px;
     font-size: 16px;
@@ -102,11 +102,11 @@ input:focus, select:focus {
     cursor: pointer;
     transition: 0.3s;
 }
-#duplicateModal .modal-content button#closeModal {
+#arabicModal .modal-content button#closeModal {
     background: #f44336; /* أحمر لإغلاق */
     color: white;
 }
-#duplicateModal .modal-content button#closeModal:hover {
+#arabicModal .modal-content button#closeModal:hover {
     background: #d32f2f;
 }
 </style>
@@ -115,8 +115,8 @@ input:focus, select:focus {
 <div class="container">
     <h2>نموذج تسجيل الطلبة</h2>
     <form method="POST" action="/" id="studentForm">
-        <input type="text" name="last_name" placeholder="اللقب" required dir="rtl" lang="ar">
-        <input type="text" name="first_name" placeholder="الاسم الشخصي" required dir="rtl" lang="ar">
+        <input type="text" name="last_name" placeholder="اللقب" required>
+        <input type="text" name="first_name" placeholder="الاسم الشخصي" required>
 
         <!-- القسم -->
         <select name="class" required>
@@ -138,7 +138,7 @@ input:focus, select:focus {
         </select>
 
         <input type="text" name="phone" placeholder="رقم الهاتف" required>
-        <input type="text" name="note" placeholder="ملاحظة" dir="rtl" lang="ar">
+        <input type="text" name="note" placeholder="ملاحظة">
 
         <div class="buttons">
             <button type="submit" id="submitBtn">إرسال</button>
@@ -147,26 +147,34 @@ input:focus, select:focus {
     </form>
 </div>
 
-<!-- نافذة الطالب موجود -->
-<div id="duplicateModal">
+<!-- نافذة الكتابة بالعربية -->
+<div id="arabicModal">
     <div class="modal-content">
-        هذا الطالب موجود بالفعل! ❌
+        الرجاء كتابة المعلومات بالعربية فقط! ❌
         <br>
-        <button id="closeModal" onclick="closeDuplicateModal()">إغلاق</button>
+        <button id="closeModal" onclick="closeArabicModal()">إغلاق</button>
     </div>
 </div>
 
 <script>
-// إذا وصلنا باراميتر duplicate=1 من الباكند، نعرض النافذة
-window.addEventListener("DOMContentLoaded", () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if(urlParams.get("duplicate") === "1") {
-        document.getElementById("duplicateModal").style.display = "flex";
+// التحقق من أن الحقول مكتوبة بالعربية
+function isArabic(text) {
+    return /^[\u0600-\u06FF\s]+$/.test(text);
+}
+
+document.getElementById("studentForm").addEventListener("submit", function(e){
+    const lastName = this.last_name.value.trim();
+    const firstName = this.first_name.value.trim();
+    const note = this.note.value.trim();
+
+    if(!isArabic(lastName) || !isArabic(firstName) || (note && !isArabic(note))) {
+        e.preventDefault(); // منع الإرسال
+        document.getElementById("arabicModal").style.display = "flex";
     }
 });
 
-function closeDuplicateModal() {
-    document.getElementById("duplicateModal").style.display = "none";
+function closeArabicModal() {
+    document.getElementById("arabicModal").style.display = "none";
 }
 </script>
 
