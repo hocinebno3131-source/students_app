@@ -1,31 +1,32 @@
 from flask import Flask, render_template, request, redirect, jsonify
-import csv
-import os
+import sqlite3
 from collections import defaultdict
+import os
 
 app = Flask(__name__)
 
-CSV_FILE = "students.csv"
+DATABASE = "database.db"
 ADMIN_PASSWORD = "admin123"
+
+
+# -------------------------
+# الاتصال بقاعدة البيانات
+# -------------------------
+def get_db_connection():
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    return conn
+
 
 # -------------------------
 # قراءة كل الطلبة
 # -------------------------
 def read_students():
-    if not os.path.exists(CSV_FILE):
-        return []
-    with open(CSV_FILE, newline="", encoding="utf-8-sig") as f:
-        return list(csv.DictReader(f, delimiter=";"))
+    conn = get_db_connection()
+    students = conn.execute("SELECT * FROM students").fetchall()
+    conn.close()
+    return students
 
-# -------------------------
-# إعادة كتابة الملف بعد الحذف أو التعديل
-# -------------------------
-def write_students(students):
-    with open(CSV_FILE, "w", newline="", encoding="utf-8-sig") as f:
-        fieldnames = ["last_name","first_name","class","group","phone","note"]
-        writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter=";")
-        writer.writeheader()
-        writer.writerows(students)
 
 # -------------------------
 # صفحة الاستمارة
@@ -40,32 +41,37 @@ def form():
         phone = request.form["phone"].strip()
         note = request.form["note"].strip()
 
-        students = read_students()
+        conn = get_db_connection()
 
-        # منع التكرار: اللقب + الاسم + القسم
-        for s in students:
-            if (s["last_name"] == last_name and
-                s["first_name"] == first_name and
-                s["class"] == class_name):
-                return redirect("/?duplicate=1")
+        # منع التكرار (اللقب + الاسم + القسم)
+        existing = conn.execute("""
+            SELECT * FROM students
+            WHERE last_name=? AND first_name=? AND section=?
+        """, (last_name, first_name, class_name)).fetchone()
 
-        # إضافة الطالب الجديد
-        data = [last_name, first_name, class_name, group, phone, note]
-        file_exists = os.path.exists(CSV_FILE)
-        with open(CSV_FILE, "a", newline="", encoding="utf-8-sig") as f:
-            writer = csv.writer(f, delimiter=";")
-            if not file_exists:
-                writer.writerow(["last_name","first_name","class","group","phone","note"])
-            writer.writerow(data)
+        if existing:
+            conn.close()
+            return redirect("/?duplicate=1")
+
+        # إضافة الطالب
+        conn.execute("""
+            INSERT INTO students (last_name, first_name, section, group_name, phone)
+            VALUES (?, ?, ?, ?, ?)
+        """, (last_name, first_name, class_name, group, phone))
+
+        conn.commit()
+        conn.close()
 
         return redirect("/success")
 
     return render_template("form.html")
 
+
 # -------------------------
 @app.route("/success")
 def success():
     return "<h2>تم إرسال البيانات بنجاح ✅</h2>"
+
 
 # -------------------------
 # صفحة الأدمن
@@ -82,14 +88,12 @@ def admin():
     students = read_students()
     grouped = defaultdict(list)
 
-    # نضيف index لكل طالب (مهم للحذف)
-    for i, s in enumerate(students):
-        s["_index"] = i
-        key = f"{s['class']} — {s['group']}"
+    for s in students:
+        key = f"{s['section']} — {s['group_name']}"
         grouped[key].append(s)
 
-    classes = sorted({s['class'] for s in students})
-    groups = sorted({s['group'] for s in students})
+    classes = sorted({s['section'] for s in students})
+    groups = sorted({s['group_name'] for s in students})
 
     return render_template(
         "admin.html",
@@ -100,18 +104,21 @@ def admin():
         selected_group=""
     )
 
+
 # -------------------------
-# مسار حذف طالب (لـ AJAX)
+# حذف طالب
 # -------------------------
 @app.route("/delete_student", methods=["POST"])
 def delete_student_ajax():
-    index = int(request.form.get("index", -1))
-    students = read_students()
-    if 0 <= index < len(students):
-        students.pop(index)
-        write_students(students)
-        return jsonify({"status": "success"})
-    return jsonify({"status": "error"})
+    student_id = request.form.get("id")
+
+    conn = get_db_connection()
+    conn.execute("DELETE FROM students WHERE id=?", (student_id,))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"status": "success"})
+
 
 # -------------------------
 if __name__ == "__main__":
