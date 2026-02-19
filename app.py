@@ -8,7 +8,6 @@ app = Flask(__name__)
 DATABASE = "database.db"
 ADMIN_PASSWORD = "admin123"
 
-
 # -------------------------
 # الاتصال بقاعدة البيانات
 # -------------------------
@@ -17,16 +16,16 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-
 # -------------------------
 # قراءة كل الطلبة
 # -------------------------
 def read_students():
     conn = get_db_connection()
-    students = conn.execute("SELECT * FROM students").fetchall()
+    rows = conn.execute("SELECT * FROM students").fetchall()
     conn.close()
+    # تحويل كل Row إلى dict عادية
+    students = [dict(row) for row in rows]
     return students
-
 
 # -------------------------
 # صفحة الاستمارة
@@ -55,9 +54,9 @@ def form():
 
         # إضافة الطالب
         conn.execute("""
-            INSERT INTO students (last_name, first_name, section, group_name, phone)
-            VALUES (?, ?, ?, ?, ?)
-        """, (last_name, first_name, class_name, group, phone))
+            INSERT INTO students (last_name, first_name, section, group_name, phone, note)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (last_name, first_name, class_name, group, phone, note))
 
         conn.commit()
         conn.close()
@@ -66,12 +65,10 @@ def form():
 
     return render_template("form.html")
 
-
 # -------------------------
 @app.route("/success")
 def success():
     return "<h2>تم إرسال البيانات بنجاح ✅</h2>"
-
 
 # -------------------------
 # صفحة الأدمن
@@ -104,7 +101,6 @@ def admin():
         selected_group=""
     )
 
-
 # -------------------------
 # حذف طالب
 # -------------------------
@@ -118,7 +114,6 @@ def delete_student_ajax():
     conn.close()
 
     return jsonify({"status": "success"})
-
 
 # -------------------------
 if __name__ == "__main__":
