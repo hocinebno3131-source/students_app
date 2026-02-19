@@ -57,7 +57,6 @@ tr:nth-child(even) { background: #f1f1f1; }
     font-weight: bold;
 }
 
-/* --------- التعديل: إخفاء عمود الحذف عند الطباعة --------- */
 @media print {
     body * { visibility: hidden; }
     #tablesContainer, #tablesContainer * { visibility: visible; }
@@ -65,7 +64,6 @@ tr:nth-child(even) { background: #f1f1f1; }
     th:last-child, td:last-child { display: none; }
 }
 
-/* ----- نافذة الحذف المنبثقة ----- */
 #deleteModal {
     display: none;
     position: fixed;
@@ -153,10 +151,10 @@ tr:nth-child(even) { background: #f1f1f1; }
 <tr id="row-{{ s['_index'] }}">
 <td>{{ s['last_name'] }}</td>
 <td>{{ s['first_name'] }}</td>
-<td>{{ s['class'] }}</td>
-<td>{{ s['group'] }}</td>
+<td>{{ s['section'] }}</td>
+<td>{{ s['group_name'] }}</td>
 <td>{{ s['phone'] }}</td>
-<td>{{ s['note'] }}</td>
+<td>{{ s.get('note','') }}</td>
 <td>
 <button class="delete-btn" onclick="showDeleteModal({{ s['_index'] }})">🗑 حذف</button>
 </td>
@@ -169,7 +167,6 @@ tr:nth-child(even) { background: #f1f1f1; }
 {% endfor %}
 </div>
 
-<!-- نافذة الحذف -->
 <div id="deleteModal">
     <div class="modal-content">
         <h3>هل أنت متأكد من حذف هذا الطالب؟</h3>
@@ -205,7 +202,6 @@ function printTables() {
     window.print();
 }
 
-// ----- الحذف مع نافذة منبثقة -----
 function showDeleteModal(index) {
     currentIndex = index;
     document.getElementById('deleteModal').style.display = 'flex';
@@ -220,7 +216,7 @@ document.getElementById('deleteConfirm').addEventListener('click', () => {
         fetch("/delete_student", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: "index=" + currentIndex
+            body: "id=" + currentIndex
         })
         .then(response => response.json())
         .then(data => {
