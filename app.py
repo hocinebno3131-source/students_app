@@ -25,6 +25,9 @@ def read_students():
     conn.close()
     # تحويل كل Row إلى dict عادية
     students = [dict(row) for row in rows]
+    # إضافة _index لكل طالب لتسهيل الحذف
+    for i, s in enumerate(students):
+        s["_index"] = i
     return students
 
 # -------------------------
