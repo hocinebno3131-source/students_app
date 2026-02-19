@@ -1,41 +1,39 @@
-from flask import Flask, render_template, request, redirect, jsonify
-import sqlite3
-from collections import defaultdict
+from flask import Flask, render_template, request, redirect
+import csv
 import os
+from collections import defaultdict
 
 app = Flask(__name__)
 
-DATABASE = "database.db"
+CSV_FILE = "students.csv"
 ADMIN_PASSWORD = "admin123"
-
-# -------------------------
-# الاتصال بقاعدة البيانات
-# -------------------------
-def get_db_connection():
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row
-    return conn
 
 # -------------------------
 # قراءة كل الطلبة
 # -------------------------
 def read_students():
-    conn = get_db_connection()
-    rows = conn.execute("SELECT * FROM students").fetchall()
-    conn.close()
-    # تحويل كل Row إلى dict عادية
-    students = [dict(row) for row in rows]
-    # إضافة _index لكل طالب لتسهيل الحذف
-    for i, s in enumerate(students):
-        s["_index"] = i
-    return students
+    if not os.path.exists(CSV_FILE):
+        return []
+    with open(CSV_FILE, newline="", encoding="utf-8-sig") as f:
+        return list(csv.DictReader(f, delimiter=";"))
 
 # -------------------------
-# صفحة الاستمارة
+# إعادة كتابة الملف بعد الحذف
+# -------------------------
+def write_students(students):
+    with open(CSV_FILE, "w", newline="", encoding="utf-8-sig") as f:
+        fieldnames = ["last_name","first_name","class","group","phone","note"]
+        writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter=";")
+        writer.writeheader()
+        writer.writerows(students)
+
+# -------------------------
+# صفحة الاستمارة + منع التكرار
 # -------------------------
 @app.route("/", methods=["GET", "POST"])
 def form():
     if request.method == "POST":
+
         last_name = request.form["last_name"].strip()
         first_name = request.form["first_name"].strip()
         class_name = request.form["class"].strip()
@@ -43,26 +41,26 @@ def form():
         phone = request.form["phone"].strip()
         note = request.form["note"].strip()
 
-        conn = get_db_connection()
+        students = read_students()
 
-        # منع التكرار (اللقب + الاسم + القسم)
-        existing = conn.execute("""
-            SELECT * FROM students
-            WHERE last_name=? AND first_name=? AND section=?
-        """, (last_name, first_name, class_name)).fetchone()
+        # منع التكرار
+        for s in students:
+            if (
+                s["last_name"] == last_name and
+                s["first_name"] == first_name and
+                s["class"] == class_name and
+                s["group"] == group
+            ):
+                return redirect("/?duplicate=1")
 
-        if existing:
-            conn.close()
-            return redirect("/?duplicate=1")
+        data = [last_name, first_name, class_name, group, phone, note]
 
-        # إضافة الطالب
-        conn.execute("""
-            INSERT INTO students (last_name, first_name, section, group_name, phone, note)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (last_name, first_name, class_name, group, phone, note))
-
-        conn.commit()
-        conn.close()
+        file_exists = os.path.exists(CSV_FILE)
+        with open(CSV_FILE, "a", newline="", encoding="utf-8-sig") as f:
+            writer = csv.writer(f, delimiter=";")
+            if not file_exists:
+                writer.writerow(["last_name","first_name","class","group","phone","note"])
+            writer.writerow(data)
 
         return redirect("/success")
 
@@ -78,6 +76,7 @@ def success():
 # -------------------------
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
+
     if request.method == "GET":
         return render_template("admin_password.html", message="")
 
@@ -86,14 +85,17 @@ def admin():
         return render_template("admin_password.html", message="كلمة المرور غير صحيحة ❌")
 
     students = read_students()
+
     grouped = defaultdict(list)
 
-    for s in students:
-        key = f"{s['section']} — {s['group_name']}"
+    # نضيف index لكل طالب (مهم للحذف)
+    for i, s in enumerate(students):
+        s["_index"] = i
+        key = f"{s['class']} — {s['group']}"
         grouped[key].append(s)
 
-    classes = sorted({s['section'] for s in students})
-    groups = sorted({s['group_name'] for s in students})
+    classes = sorted({s['class'] for s in students})
+    groups = sorted({s['group'] for s in students})
 
     return render_template(
         "admin.html",
@@ -105,18 +107,15 @@ def admin():
     )
 
 # -------------------------
-# حذف طالب
+# مسار حذف طالب
 # -------------------------
-@app.route("/delete_student", methods=["POST"])
-def delete_student_ajax():
-    student_id = request.form.get("id")
-
-    conn = get_db_connection()
-    conn.execute("DELETE FROM students WHERE id=?", (student_id,))
-    conn.commit()
-    conn.close()
-
-    return jsonify({"status": "success"})
+@app.route("/delete/<int:index>")
+def delete_student(index):
+    students = read_students()
+    if 0 <= index < len(students):
+        students.pop(index)
+        write_students(students)
+    return redirect("/admin")
 
 # -------------------------
 if __name__ == "__main__":
