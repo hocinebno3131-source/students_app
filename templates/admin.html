@@ -33,7 +33,9 @@ button:hover { background: #0d47a1; }
     padding: 6px 10px;
     font-size: 14px;
 }
-.delete-btn:hover { background: #b71c1c; }
+.delete-btn:hover {
+    background: #b71c1c;
+}
 
 table {
     width: 100%;
@@ -148,15 +150,15 @@ tr:nth-child(even) { background: #f1f1f1; }
 
 <tbody>
 {% for s in students %}
-<tr id="row-{{ loop.index0 }}">
+<tr id="row-{{ s['_index'] }}">
 <td>{{ s['last_name'] }}</td>
 <td>{{ s['first_name'] }}</td>
-<td>{{ s['section'] }}</td>
-<td>{{ s['group_name'] }}</td>
+<td>{{ s['class'] }}</td>
+<td>{{ s['group'] }}</td>
 <td>{{ s['phone'] }}</td>
 <td>{{ s['note'] }}</td>
 <td>
-<button class="delete-btn" onclick="showDeleteModal({{ loop.index0 }})">🗑 حذف</button>
+<button class="delete-btn" onclick="showDeleteModal({{ s['_index'] }})">🗑 حذف</button>
 </td>
 </tr>
 {% endfor %}
@@ -218,7 +220,7 @@ document.getElementById('deleteConfirm').addEventListener('click', () => {
         fetch("/delete_student", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: "id=" + currentIndex
+            body: "index=" + currentIndex
         })
         .then(response => response.json())
         .then(data => {
