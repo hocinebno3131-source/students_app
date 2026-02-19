@@ -33,9 +33,7 @@ button:hover { background: #0d47a1; }
     padding: 6px 10px;
     font-size: 14px;
 }
-.delete-btn:hover {
-    background: #b71c1c;
-}
+.delete-btn:hover { background: #b71c1c; }
 
 table {
     width: 100%;
@@ -57,6 +55,7 @@ tr:nth-child(even) { background: #f1f1f1; }
     font-weight: bold;
 }
 
+/* --------- التعديل: إخفاء عمود الحذف عند الطباعة --------- */
 @media print {
     body * { visibility: hidden; }
     #tablesContainer, #tablesContainer * { visibility: visible; }
@@ -64,6 +63,7 @@ tr:nth-child(even) { background: #f1f1f1; }
     th:last-child, td:last-child { display: none; }
 }
 
+/* ----- نافذة الحذف المنبثقة ----- */
 #deleteModal {
     display: none;
     position: fixed;
@@ -148,15 +148,15 @@ tr:nth-child(even) { background: #f1f1f1; }
 
 <tbody>
 {% for s in students %}
-<tr id="row-{{ s['_index'] }}">
+<tr id="row-{{ loop.index0 }}">
 <td>{{ s['last_name'] }}</td>
 <td>{{ s['first_name'] }}</td>
 <td>{{ s['section'] }}</td>
 <td>{{ s['group_name'] }}</td>
 <td>{{ s['phone'] }}</td>
-<td>{{ s.get('note','') }}</td>
+<td>{{ s['note'] }}</td>
 <td>
-<button class="delete-btn" onclick="showDeleteModal({{ s['_index'] }})">🗑 حذف</button>
+<button class="delete-btn" onclick="showDeleteModal({{ loop.index0 }})">🗑 حذف</button>
 </td>
 </tr>
 {% endfor %}
@@ -167,6 +167,7 @@ tr:nth-child(even) { background: #f1f1f1; }
 {% endfor %}
 </div>
 
+<!-- نافذة الحذف -->
 <div id="deleteModal">
     <div class="modal-content">
         <h3>هل أنت متأكد من حذف هذا الطالب؟</h3>
@@ -202,6 +203,7 @@ function printTables() {
     window.print();
 }
 
+// ----- الحذف مع نافذة منبثقة -----
 function showDeleteModal(index) {
     currentIndex = index;
     document.getElementById('deleteModal').style.display = 'flex';
