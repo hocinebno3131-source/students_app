@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, jsonify
 import csv
 import os
 from collections import defaultdict
@@ -18,7 +18,7 @@ def read_students():
         return list(csv.DictReader(f, delimiter=";"))
 
 # -------------------------
-# إعادة كتابة الملف بعد الحذف
+# إعادة كتابة الملف بعد التعديل أو الحذف
 # -------------------------
 def write_students(students):
     with open(CSV_FILE, "w", newline="", encoding="utf-8-sig") as f:
@@ -69,7 +69,7 @@ def form():
 # -------------------------
 @app.route("/success")
 def success():
-    return "<h2>تم إرسال البيانات بنجاح ✅</h2>"
+    return render_template("success.html")
 
 # -------------------------
 # صفحة الأدمن
@@ -107,15 +107,26 @@ def admin():
     )
 
 # -------------------------
-# مسار حذف طالب
+# مسار حذف طالب عبر POST (يدعم نافذة JS المنبثقة)
 # -------------------------
-@app.route("/delete/<int:index>")
-def delete_student(index):
+@app.route("/delete_student", methods=["POST"])
+def delete_student_post():
+    index = request.form.get("index")
+    if index is None:
+        return jsonify({"status": "error", "message": "لم يتم تحديد الطالب"})
+    
+    try:
+        index = int(index)
+    except ValueError:
+        return jsonify({"status": "error", "message": "رقم غير صالح"})
+
     students = read_students()
     if 0 <= index < len(students):
         students.pop(index)
         write_students(students)
-    return redirect("/admin")
+        return jsonify({"status": "success"})
+    else:
+        return jsonify({"status": "error", "message": "الطالب غير موجود"})
 
 # -------------------------
 if __name__ == "__main__":
