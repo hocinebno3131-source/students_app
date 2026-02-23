@@ -11,11 +11,23 @@ h1 { text-align: center; color: #1976d2; }
 
 .filters { display: flex; gap: 15px; justify-content: center; margin-bottom: 25px; flex-wrap: wrap; }
 
-select, button { padding: 10px 15px; border-radius: 8px; border: none; font-size: 16px; cursor: pointer; transition: 0.3s; }
+select, button {
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
 select { background: #e0e0e0; }
 select:hover { background: #d5d5d5; }
+
 button { background: #1976d2; color: white; }
 button:hover { background: #0d47a1; }
+
+#printBtn { background: #f57c00; }
+#printBtn:hover { background: #ef6c00; }
 
 .delete-btn { background: #e53935; padding: 6px 10px; font-size: 14px; }
 .delete-btn:hover { background: #b71c1c; }
@@ -23,17 +35,30 @@ button:hover { background: #0d47a1; }
 .edit-btn { background: #43a047; padding: 6px 10px; font-size: 14px; }
 .edit-btn:hover { background: #2e7d32; }
 
-.save-btn { background: #1976d2; padding: 6px 10px; font-size: 14px; }
-.cancel-btn { background: #757575; padding: 6px 10px; font-size: 14px; }
+.save-btn { background: #1976d2; padding: 6px 10px; font-size: 14px; display:none; }
+.cancel-btn { background: #757575; padding: 6px 10px; font-size: 14px; display:none; }
 
-table { width: 100%; border-collapse: collapse; margin-bottom: 35px; background: white; box-shadow: 0 3px 8px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 35px;
+    background: white;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
 th, td { padding: 12px 15px; text-align: center; }
 th { background: #1976d2; color: white; }
 tr:nth-child(even) { background: #f1f1f1; }
+
 .table-title { margin: 15px 0 5px 0; font-size: 18px; font-weight: bold; }
 
 /* صف في وضع التعديل */
-.editing-row { background-color: #fff9c4 !important; transition: 0.3s; }
+.editing-row {
+    background-color: #fff9c4 !important;
+    transition: 0.3s;
+}
 
 /* الطباعة */
 @media print {
@@ -52,12 +77,16 @@ tr:nth-child(even) { background: #f1f1f1; }
 <div class="filters">
 <select id="classFilter">
 <option value="">اختر القسم</option>
-{% for c in classes %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+{% for c in classes %}
+<option value="{{ c }}">{{ c }}</option>
+{% endfor %}
 </select>
 
 <select id="groupFilter">
 <option value="">اختر الفوج</option>
-{% for g in groups %}<option value="{{ g }}">{{ g }}</option>{% endfor %}
+{% for g in groups %}
+<option value="{{ g }}">{{ g }}</option>
+{% endfor %}
 </select>
 
 <button onclick="applyFilter()">فلترة</button>
@@ -67,15 +96,25 @@ tr:nth-child(even) { background: #f1f1f1; }
 
 <div id="tablesContainer">
 {% for group_name, students in grouped.items() %}
-<div class="table-wrapper" data-class="{{ group_name.split(' — ')[0] }}" data-group="{{ group_name.split(' — ')[1] }}">
+<div class="table-wrapper"
+     data-class="{{ group_name.split(' — ')[0] }}"
+     data-group="{{ group_name.split(' — ')[1] }}">
+
 <div class="table-title">{{ group_name }}</div>
 
 <table>
 <thead>
 <tr>
-<th>اللقب</th><th>الاسم</th><th>القسم</th><th>الفوج</th><th>الهاتف</th><th>ملاحظة</th><th>إجراءات</th>
+<th>اللقب</th>
+<th>الاسم</th>
+<th>القسم</th>
+<th>الفوج</th>
+<th>الهاتف</th>
+<th>ملاحظة</th>
+<th>إجراءات</th>
 </tr>
 </thead>
+
 <tbody>
 {% for s in students %}
 <tr id="row-{{ s['_index'] }}">
@@ -88,128 +127,162 @@ tr:nth-child(even) { background: #f1f1f1; }
 <td>
 <button class="edit-btn" onclick="editRow({{ s['_index'] }})">✏️ تعديل</button>
 <button class="delete-btn" onclick="showDeleteModal({{ s['_index'] }})">🗑 حذف</button>
-<button class="save-btn" style="display:none;" onclick="saveRow({{ s['_index'] }})">💾 حفظ</button>
-<button class="cancel-btn" style="display:none;" onclick="cancelEdit({{ s['_index'] }})">❌ إلغاء</button>
+<button class="save-btn" onclick="saveRow({{ s['_index'] }})">💾 حفظ</button>
+<button class="cancel-btn" onclick="cancelEdit({{ s['_index'] }})">❌ إلغاء</button>
 </td>
 </tr>
 {% endfor %}
 </tbody>
+
 </table>
 </div>
 {% endfor %}
 </div>
 
-<script>
-let currentEditing = null;
-let originalValues = {};
-
-// --- فلترة ---
-function applyFilter() {
-    const classVal = document.getElementById("classFilter").value;
-    const groupVal = document.getElementById("groupFilter").value;
-    document.querySelectorAll(".table-wrapper").forEach(t => {
-        t.style.display = ((classVal==="" || t.dataset.class===classVal) &&
-                           (groupVal==="" || t.dataset.group===groupVal)) ? "block" : "none";
-    });
-}
-function showAll() {
-    document.querySelectorAll(".table-wrapper").forEach(t => t.style.display="block");
-    classFilter.value=""; groupFilter.value="";
-}
-function printTables() { window.print(); }
-
-// --- الحذف ---
-let currentIndex = null;
-function showDeleteModal(index) { currentIndex=index; document.getElementById('deleteModal')?.style.display='flex'; }
-document.addEventListener('click', e=>{
-    if(e.target.id==='deleteCancel') document.getElementById('deleteModal').style.display='none';
-});
-document.addEventListener('click', e=>{
-    if(e.target.id==='deleteConfirm'){
-        if(currentIndex!==null){
-            fetch("/delete_student",{method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded"}, body:"index="+currentIndex})
-            .then(r=>r.json()).then(data=>{
-                if(data.status==="success"){document.getElementById("row-"+currentIndex).remove();}
-                else alert("حدث خطأ أثناء الحذف ❌");
-                document.getElementById('deleteModal').style.display='none';
-                currentIndex=null;
-            });
-        }
-    }
-});
-
-// --- تعديل الصف ---
-function editRow(index){
-    if(currentEditing!==null) return;
-    const row=document.getElementById("row-"+index);
-    const cells=row.querySelectorAll("td");
-    originalValues[index]=[];
-    for(let i=0;i<cells.length-1;i++){
-        originalValues[index][i]=cells[i].innerText;
-        cells[i].innerHTML=`<input type="text" value="${cells[i].innerText}" style="width:100%">`;
-    }
-    row.classList.add("editing-row"); currentEditing=index;
-    toggleButtons(row,true);
-}
-
-function cancelEdit(index){
-    const row=document.getElementById("row-"+index);
-    const cells=row.querySelectorAll("td");
-    originalValues[index].forEach((val,i)=>cells[i].innerText=val);
-    row.classList.remove("editing-row"); currentEditing=null;
-    toggleButtons(row,false);
-}
-
-function toggleButtons(row,editing){
-    const editBtn=row.querySelector(".edit-btn");
-    const deleteBtn=row.querySelector(".delete-btn");
-    const saveBtn=row.querySelector(".save-btn");
-    const cancelBtn=row.querySelector(".cancel-btn");
-    if(editing){
-        editBtn.style.display="none"; deleteBtn.style.display="none";
-        saveBtn.style.display="inline-block"; cancelBtn.style.display="inline-block";
-    } else {
-        editBtn.style.display="inline-block"; deleteBtn.style.display="inline-block";
-        saveBtn.style.display="none"; cancelBtn.style.display="none";
-    }
-}
-
-// --- حفظ الصف ---
-function saveRow(index){
-    const row=document.getElementById("row-"+index);
-    const cells=row.querySelectorAll("td");
-    const data={ index:index,
-        last_name: cells[0].querySelector("input").value,
-        first_name: cells[1].querySelector("input").value,
-        class: cells[2].querySelector("input").value,
-        group: cells[3].querySelector("input").value,
-        phone: cells[4].querySelector("input").value,
-        note: cells[5].querySelector("input").value
-    };
-    fetch("/edit_student",{method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(data)})
-    .then(r=>r.json())
-    .then(resp=>{
-        if(resp.status==="success"){
-            for(let i=0;i<6;i++){ cells[i].innerText=data[Object.keys(data)[i+1]]; }
-            row.classList.remove("editing-row"); currentEditing=null;
-            toggleButtons(row,false);
-        } else alert("حدث خطأ أثناء الحفظ ❌");
-    });
-}
-</script>
-
 <!-- نافذة الحذف -->
-<div id="deleteModal" style="display:none;">
-    <div style="position:fixed; z-index:999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center;">
-        <div style="background:#fff; padding:25px 30px; border-radius:12px; text-align:center; max-width:400px; width:90%;">
-            <h3 style="color:#e53935;">هل أنت متأكد من حذف هذا الطالب؟</h3>
-            <div style="display:flex; gap:15px; justify-content:center;">
-                <button id="deleteConfirm" style="flex:1; padding:12px; border:none; border-radius:8px; font-size:16px; font-weight:bold; background:#e53935; color:white;">حذف ✅</button>
-                <button id="deleteCancel" style="flex:1; padding:12px; border:none; border-radius:8px; font-size:16px; font-weight:bold; background:#9e9e9e; color:white;">إلغاء ❌</button>
-            </div>
+<div id="deleteModal" style="display:none; position:fixed; z-index:999; left:0;top:0;width:100%;height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center;">
+    <div style="background:#fff;padding:25px 30px;border-radius:12px;text-align:center;box-shadow:0 8px 25px rgba(0,0,0,0.2); max-width:400px;width:90%;">
+        <h3 style="margin-bottom:20px;color:#e53935;">هل أنت متأكد من حذف هذا الطالب؟</h3>
+        <div style="display:flex;gap:15px;justify-content:center;">
+            <button id="deleteConfirm" style="flex:1;padding:12px;border:none;border-radius:8px;font-size:16px;cursor:pointer;font-weight:bold;background:#e53935;color:white;">حذف ✅</button>
+            <button id="deleteCancel" style="flex:1;padding:12px;border:none;border-radius:8px;font-size:16px;cursor:pointer;font-weight:bold;background:#9e9e9e;color:white;">إلغاء ❌</button>
         </div>
     </div>
 </div>
+
+<script>
+let currentEditing = null;
+let currentIndex = null;
+
+function applyFilter() {
+    const classVal = document.getElementById("classFilter").value;
+    const groupVal = document.getElementById("groupFilter").value;
+
+    document.querySelectorAll(".table-wrapper").forEach(t => {
+        t.style.display =
+        ((classVal === "" || t.dataset.class === classVal) &&
+         (groupVal === "" || t.dataset.group === groupVal))
+         ? "block" : "none";
+    });
+}
+
+function showAll() {
+    document.querySelectorAll(".table-wrapper").forEach(t => t.style.display="block");
+    classFilter.value="";
+    groupFilter.value="";
+}
+
+function printTables() {
+    window.print();
+}
+
+// ----------------- الحذف -----------------
+function showDeleteModal(index) {
+    currentIndex = index;
+    document.getElementById('deleteModal').style.display = 'flex';
+}
+
+document.getElementById('deleteCancel').addEventListener('click', () => {
+    document.getElementById('deleteModal').style.display = 'none';
+});
+
+document.getElementById('deleteConfirm').addEventListener('click', () => {
+    if(currentIndex !== null) {
+        fetch("/delete_student", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: "index=" + currentIndex
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.status === "success") {
+                const row = document.getElementById("row-" + currentIndex);
+                if(row) row.remove();
+            } else {
+                alert("حدث خطأ أثناء الحذف ❌");
+            }
+            document.getElementById('deleteModal').style.display = 'none';
+            currentIndex = null;
+        });
+    }
+});
+
+// ----------------- تعديل الصف -----------------
+function editRow(index) {
+    if(currentEditing !== null) return;
+
+    const row = document.getElementById("row-" + index);
+    const cells = row.querySelectorAll("td");
+
+    row.classList.add("editing-row");
+    currentEditing = index;
+
+    for(let i = 0; i < cells.length - 1; i++) {
+        const text = cells[i].innerText;
+        cells[i].innerHTML = `<input type="text" value="${text}" style="width:100%">`;
+        // تحقق لحظي من العربية
+        cells[i].querySelector("input").addEventListener("input", function(){
+            if(!/^[\u0600-\u06FF0-9\s\-']*$/.test(this.value)) {
+                this.value = this.value.replace(/[^\u0600-\u06FF0-9\s\-']/g,'');
+            }
+        });
+    }
+
+    toggleButtons(row, true);
+}
+
+function cancelEdit(index) {
+    const row = document.getElementById("row-" + index);
+    location.reload(); // لاحقًا يمكن إرجاع النص الأصلي بدون reload
+}
+
+function toggleButtons(row, editing) {
+    const editBtn = row.querySelector(".edit-btn");
+    const deleteBtn = row.querySelector(".delete-btn");
+    const saveBtn = row.querySelector(".save-btn");
+    const cancelBtn = row.querySelector(".cancel-btn");
+
+    if(editing) {
+        editBtn.style.display = "none";
+        deleteBtn.style.display = "none";
+        saveBtn.style.display = "inline-block";
+        cancelBtn.style.display = "inline-block";
+    } else {
+        editBtn.style.display = "inline-block";
+        deleteBtn.style.display = "inline-block";
+        saveBtn.style.display = "none";
+        cancelBtn.style.display = "none";
+    }
+}
+
+function saveRow(index) {
+    const row = document.getElementById("row-" + index);
+    const inputs = row.querySelectorAll("input");
+    let updatedData = [];
+    inputs.forEach(inp => updatedData.push(inp.value.trim()));
+
+    // إرسال البيانات لـ Flask عبر POST
+    fetch("/update_student", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `index=${index}&last_name=${encodeURIComponent(updatedData[0])}&first_name=${encodeURIComponent(updatedData[1])}&class=${encodeURIComponent(updatedData[2])}&group=${encodeURIComponent(updatedData[3])}&phone=${encodeURIComponent(updatedData[4])}&note=${encodeURIComponent(updatedData[5])}`
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.status === "success") {
+            // تحديث الصف مباشرة بدون reload
+            for(let i = 0; i < inputs.length; i++) {
+                row.children[i].innerText = updatedData[i];
+            }
+            row.classList.remove("editing-row");
+            toggleButtons(row, false);
+            currentEditing = null;
+        } else {
+            alert("حدث خطأ أثناء الحفظ ❌");
+        }
+    });
+}
+</script>
 
 </body>
 </html>
