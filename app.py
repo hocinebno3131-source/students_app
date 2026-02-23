@@ -129,6 +129,29 @@ def delete_student_post():
         return jsonify({"status": "error", "message": "الطالب غير موجود"})
 
 # -------------------------
+# مسار تحديث بيانات الطالب عبر POST
+# -------------------------
+@app.route("/update_student", methods=["POST"])
+def update_student():
+    try:
+        index = int(request.form.get("index"))
+    except (ValueError, TypeError):
+        return jsonify({"status":"error", "message":"رقم غير صالح"})
+
+    students = read_students()
+    if not (0 <= index < len(students)):
+        return jsonify({"status":"error", "message":"الطالب غير موجود"})
+
+    # تحديث البيانات من الفورم
+    fields = ["last_name","first_name","class","group","phone","note"]
+    for field in fields:
+        if field in request.form:
+            students[index][field] = request.form[field].strip()
+
+    write_students(students)
+    return jsonify({"status":"success"})
+
+# -------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
