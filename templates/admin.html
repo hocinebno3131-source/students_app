@@ -60,42 +60,6 @@ tr:nth-child(even) { background: #f1f1f1; }
     transition: 0.3s;
 }
 
-/* نافذة الحذف */
-#deleteModal {
-    display: none;
-    position: fixed;
-    z-index: 999;
-    left: 0; top: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5);
-    justify-content: center;
-    align-items: center;
-}
-#deleteModal .modal-content {
-    background: #fff;
-    padding: 25px 30px;
-    border-radius: 12px;
-    text-align: center;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-    max-width: 400px;
-    width: 90%;
-}
-#deleteModal h3 { margin-bottom: 20px; color: #e53935; }
-#deleteModal .modal-buttons { display: flex; gap: 15px; justify-content: center; }
-#deleteModal button {
-    flex: 1;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: 0.3s;
-}
-#deleteConfirm { background: #e53935; color: white; }
-#deleteConfirm:hover { background: #b71c1c; }
-#deleteCancel { background: #9e9e9e; color: white; }
-#deleteCancel:hover { background: #616161; }
-
 /* نافذة التحذير عند كتابة غير العربية */
 #arabicModal {
     display: none;
@@ -192,8 +156,8 @@ tr:nth-child(even) { background: #f1f1f1; }
 <tr id="row-{{ s['_index'] }}">
 <td>{{ s['last_name'] }}</td>
 <td>{{ s['first_name'] }}</td>
-<td>{{ s['class'] }}</td>
-<td>{{ s['group'] }}</td>
+<td data-value="{{ s['class'] }}">{{ s['class'] }}</td>
+<td data-value="{{ s['group'] }}">{{ s['group'] }}</td>
 <td>{{ s['phone'] }}</td>
 <td>{{ s['note'] }}</td>
 <td>
@@ -215,7 +179,7 @@ tr:nth-child(even) { background: #f1f1f1; }
 <div id="deleteModal">
     <div class="modal-content">
         <h3>هل أنت متأكد من حذف هذا الطالب؟</h3>
-        <div class="modal-buttons">
+        <div class="modal-buttons" style="display:flex; gap:15px; justify-content:center;">
             <button id="deleteConfirm">حذف ✅</button>
             <button id="deleteCancel">إلغاء ❌</button>
         </div>
@@ -235,6 +199,7 @@ tr:nth-child(even) { background: #f1f1f1; }
 let currentEditing = null;
 let currentIndex = null;
 
+// --- التعديل ---
 function editRow(index) {
     if(currentEditing !== null) return;
 
@@ -244,10 +209,31 @@ function editRow(index) {
     row.classList.add("editing-row");
     currentEditing = index;
 
-    for(let i = 0; i < cells.length - 1; i++) {
-        const text = cells[i].innerText;
-        cells[i].innerHTML = `<input type="text" value="${text}" style="width:100%">`;
-    }
+    // تحويل الخلايا للنصوص أو Dropdown
+    cells.forEach((cell, i) => {
+        if(i === 2){ // القسم
+            const value = cell.dataset.value;
+            const options = [{% for c in classes %}'{{ c }}',{% endfor %}];
+            let select = `<select>`;
+            options.forEach(opt => {
+                select += `<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`;
+            });
+            select += `</select>`;
+            cell.innerHTML = select;
+        } else if(i === 3){ // الفوج
+            const value = cell.dataset.value;
+            const options = [{% for g in groups %}'{{ g }}',{% endfor %}];
+            let select = `<select>`;
+            options.forEach(opt => {
+                select += `<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`;
+            });
+            select += `</select>`;
+            cell.innerHTML = select;
+        } else if(i < cells.length -1){ // النصوص
+            const text = cell.innerText;
+            cell.innerHTML = `<input type="text" value="${text}" style="width:100%">`;
+        }
+    });
 
     toggleButtons(row, true);
 }
@@ -255,10 +241,14 @@ function editRow(index) {
 function cancelEdit(index) {
     const row = document.getElementById("row-" + index);
     const cells = row.querySelectorAll("td");
-    const inputs = row.querySelectorAll("input");
+    const inputs = row.querySelectorAll("input, select");
 
     inputs.forEach((input, i) => {
-        cells[i].innerText = input.defaultValue;
+        if(input.tagName==='SELECT'){
+            cells[i].innerText = input.options[input.selectedIndex].value;
+        } else {
+            cells[i].innerText = input.defaultValue;
+        }
     });
 
     row.classList.remove("editing-row");
@@ -285,18 +275,23 @@ function toggleButtons(row, editing) {
     }
 }
 
+// التحقق من كتابة العربية فقط
 function isArabic(text) {
-    return /^[\u0600-\u06FF\s]+$/.test(text);
+    return /^[\u0600-\u06FF0-9\s]+$/.test(text);
 }
 
 function saveRow(index) {
     const row = document.getElementById("row-" + index);
-    const inputs = row.querySelectorAll("input");
+    const inputs = row.querySelectorAll("input, select");
 
-    for(let input of inputs){
-        if(input.value && !isArabic(input.value)){
-            document.getElementById("arabicModal").style.display = "flex";
-            return;
+    // تحقق العربية فقط في الخلايا النصية
+    for(let i=0; i<inputs.length; i++){
+        const input = inputs[i];
+        if(input.tagName==='INPUT'){
+            if(input.value && !isArabic(input.value)){
+                document.getElementById("arabicModal").style.display = "flex";
+                return;
+            }
         }
     }
 
@@ -335,6 +330,7 @@ function saveRow(index) {
     });
 }
 
+// --- الحذف ---
 function showDeleteModal(index) {
     currentIndex = index;
     document.getElementById('deleteModal').style.display = 'flex';
@@ -363,6 +359,7 @@ document.getElementById('deleteConfirm').addEventListener('click', () => {
     }
 });
 
+// --- الطباعة ---
 function applyFilter() {
     const classVal = document.getElementById("classFilter").value;
     const groupVal = document.getElementById("groupFilter").value;
@@ -381,6 +378,7 @@ function showAll() {
 }
 function printTables() { window.print(); }
 function closeArabicModal() { document.getElementById("arabicModal").style.display = "none"; }
+
 </script>
 
 </body>
