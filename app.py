@@ -61,7 +61,6 @@ def form():
             writer.writerow(data)
 
         return redirect("/success")
-
     return render_template("form.html")
 
 # -------------------------
@@ -84,6 +83,7 @@ def admin():
     students = read_students()
     grouped = defaultdict(list)
 
+    # نضيف index لكل طالب (مهم للحذف والتعديل)
     for i, s in enumerate(students):
         s["_index"] = i
         key = f"{s['class']} — {s['group']}"
@@ -102,7 +102,7 @@ def admin():
     )
 
 # -------------------------
-# مسار حذف طالب
+# مسار حذف طالب عبر POST
 # -------------------------
 @app.route("/delete_student", methods=["POST"])
 def delete_student_post():
@@ -124,32 +124,29 @@ def delete_student_post():
         return jsonify({"status": "error", "message": "الطالب غير موجود"})
 
 # -------------------------
-# مسار تحديث بيانات الطالب
+# مسار تعديل الطالب عبر POST
 # -------------------------
-@app.route("/update_student", methods=["POST"])
-def update_student():
+@app.route("/edit_student", methods=["POST"])
+def edit_student():
     index = request.form.get("index")
     if index is None:
-        return jsonify({"status":"error","message":"لم يتم تحديد الطالب"})
+        return jsonify({"status": "error", "message": "لم يتم تحديد الطالب"})
+    
     try:
         index = int(index)
     except ValueError:
-        return jsonify({"status":"error","message":"رقم غير صالح"})
+        return jsonify({"status": "error", "message": "رقم غير صالح"})
 
     students = read_students()
-    if not (0 <= index < len(students)):
-        return jsonify({"status":"error","message":"الطالب غير موجود"})
-
-    # تحديث الحقول
-    students[index]["last_name"] = request.form.get("last_name","").strip()
-    students[index]["first_name"] = request.form.get("first_name","").strip()
-    students[index]["class"] = request.form.get("class","").strip()
-    students[index]["group"] = request.form.get("group","").strip()
-    students[index]["phone"] = request.form.get("phone","").strip()
-    students[index]["note"] = request.form.get("note","").strip()
-
-    write_students(students)
-    return jsonify({"status":"success"})
+    if 0 <= index < len(students):
+        # الحصول على القيم الجديدة من الطلب
+        for field in ["last_name","first_name","class","group","phone","note"]:
+            if field in request.form:
+                students[index][field] = request.form[field].strip()
+        write_students(students)
+        return jsonify({"status": "success"})
+    else:
+        return jsonify({"status": "error", "message": "الطالب غير موجود"})
 
 # -------------------------
 if __name__ == "__main__":
