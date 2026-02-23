@@ -88,7 +88,7 @@ def admin():
 
     grouped = defaultdict(list)
 
-    # نضيف index لكل طالب (مهم للحذف)
+    # نضيف index لكل طالب (مهم للحذف والتعديل)
     for i, s in enumerate(students):
         s["_index"] = i
         key = f"{s['class']} — {s['group']}"
@@ -107,7 +107,7 @@ def admin():
     )
 
 # -------------------------
-# مسار حذف طالب عبر POST (يدعم نافذة JS المنبثقة)
+# مسار حذف طالب عبر POST
 # -------------------------
 @app.route("/delete_student", methods=["POST"])
 def delete_student_post():
@@ -129,27 +129,30 @@ def delete_student_post():
         return jsonify({"status": "error", "message": "الطالب غير موجود"})
 
 # -------------------------
-# مسار تحديث بيانات الطالب عبر POST
+# مسار تعديل طالب مباشر
 # -------------------------
-@app.route("/update_student", methods=["POST"])
-def update_student():
+@app.route("/edit_student", methods=["POST"])
+def edit_student():
+    data = request.get_json()
+    index = data.get("index")
+    if index is None:
+        return jsonify({"status": "error", "message": "لم يتم تحديد الطالب"})
+
     try:
-        index = int(request.form.get("index"))
-    except (ValueError, TypeError):
-        return jsonify({"status":"error", "message":"رقم غير صالح"})
+        index = int(index)
+    except ValueError:
+        return jsonify({"status": "error", "message": "رقم غير صالح"})
 
     students = read_students()
-    if not (0 <= index < len(students)):
-        return jsonify({"status":"error", "message":"الطالب غير موجود"})
-
-    # تحديث البيانات من الفورم
-    fields = ["last_name","first_name","class","group","phone","note"]
-    for field in fields:
-        if field in request.form:
-            students[index][field] = request.form[field].strip()
-
-    write_students(students)
-    return jsonify({"status":"success"})
+    if 0 <= index < len(students):
+        # تحديث القيم
+        for key in ["last_name","first_name","class","group","phone","note"]:
+            if key in data:
+                students[index][key] = data[key]
+        write_students(students)
+        return jsonify({"status":"success"})
+    else:
+        return jsonify({"status": "error", "message": "الطالب غير موجود"})
 
 # -------------------------
 if __name__ == "__main__":
