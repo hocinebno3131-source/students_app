@@ -41,6 +41,7 @@ button:hover { background: #0d47a1; }
 table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed; /* لتوحيد الأعمدة عموديًا */
     margin-bottom: 35px;
     background: white;
     box-shadow: 0 3px 8px rgba(0,0,0,0.1);
@@ -48,88 +49,50 @@ table {
     overflow: hidden;
 }
 
-th, td { padding: 12px 15px; text-align: center; }
+th, td {
+    padding: 12px 10px;
+    text-align: center;
+    word-wrap: break-word; /* التفاف النص داخل الخلية */
+}
+
 th { background: #1976d2; color: white; }
 tr:nth-child(even) { background: #f1f1f1; }
 
 .table-title { margin: 15px 0 5px 0; font-size: 18px; font-weight: bold; }
 
+/* تحديد عرض الأعمدة */
+th:nth-child(1), td:nth-child(1) { width: 10%; } /* اللقب */
+th:nth-child(2), td:nth-child(2) { width: 10%; } /* الاسم */
+th:nth-child(3), td:nth-child(3) { width: 10%; } /* القسم */
+th:nth-child(4), td:nth-child(4) { width: 10%; } /* الفوج */
+th:nth-child(5), td:nth-child(5),
+th:nth-child(6), td:nth-child(6),
+th:nth-child(7), td:nth-child(7),
+th:nth-child(8), td:nth-child(8),
+th:nth-child(9), td:nth-child(9),
+th:nth-child(10), td:nth-child(10),
+th:nth-child(11), td:nth-child(11),
+th:nth-child(12), td:nth-child(12),
+th:nth-child(13), td:nth-child(13) { width: 6%; } /* درجات */
+th:nth-child(14), td:nth-child(14) { width: 12%; } /* إجراءات */
+
 /* صف في وضع التعديل */
-.editing-row {
-    background-color: #fff9c4 !important;
-    transition: 0.3s;
-}
+.editing-row { background-color: #fff9c4 !important; transition: 0.3s; }
 
 /* نافذة الحذف */
-#deleteModal {
-    display: none; 
-    position: fixed;
-    top: 0; left: 0; right:0; bottom:0;
-    background: rgba(0,0,0,0.5);
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-#deleteModal .modal-content {
-    background: #ffeb3b;
-    padding: 25px;
-    border-radius: 12px;
-    text-align: center;
-    max-width: 400px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-    font-size: 18px;
-    font-weight: bold;
-}
-#deleteModal .modal-content button {
-    margin-top: 15px;
-    padding: 10px 20px;
-    font-size: 16px;
-    font-weight: bold;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: 0.3s;
-}
+#deleteModal { display: none; position: fixed; top: 0; left: 0; right:0; bottom:0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
+#deleteModal .modal-content { background: #ffeb3b; padding: 25px; border-radius: 12px; text-align: center; max-width: 400px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); font-size: 18px; font-weight: bold; }
+#deleteModal .modal-content button { margin-top: 15px; padding: 10px 20px; font-size: 16px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; transition: 0.3s; }
 #deleteConfirm { background: #e53935; color: white; }
 #deleteConfirm:hover { background: #b71c1c; }
 #deleteCancel { background: #757575; color: white; }
 #deleteCancel:hover { background: #424242; }
 
 /* نافذة التحذير عند كتابة غير العربية */
-#arabicModal {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; right:0; bottom:0;
-    background: rgba(0,0,0,0.5);
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-#arabicModal .modal-content {
-    background: #ffeb3b;
-    padding: 25px;
-    border-radius: 12px;
-    text-align: center;
-    max-width: 400px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-    font-size: 18px;
-    font-weight: bold;
-}
-#arabicModal .modal-content button {
-    margin-top: 15px;
-    padding: 10px 20px;
-    font-size: 16px;
-    font-weight: bold;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: 0.3s;
-    background: #f44336;
-    color: white;
-}
-#arabicModal .modal-content button:hover {
-    background: #d32f2f;
-}
+#arabicModal { display: none; position: fixed; top: 0; left: 0; right:0; bottom:0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
+#arabicModal .modal-content { background: #ffeb3b; padding: 25px; border-radius: 12px; text-align: center; max-width: 400px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); font-size: 18px; font-weight: bold; }
+#arabicModal .modal-content button { margin-top: 15px; padding: 10px 20px; font-size: 16px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; transition: 0.3s; background: #f44336; color: white; }
+#arabicModal .modal-content button:hover { background: #d32f2f; }
 
 /* الطباعة */
 @media print {
@@ -256,25 +219,26 @@ tr:nth-child(even) { background: #f1f1f1; }
 let currentEditing = null;
 let currentIndex = null;
 
+// --- تعديل ---
 function editRow(index) {
-    if(currentEditing !== null) return;
-    const row = document.getElementById("row-" + index);
-    const cells = row.querySelectorAll("td");
+    if(currentEditing!==null) return;
+    const row=document.getElementById("row-"+index);
+    const cells=row.querySelectorAll("td");
     row.classList.add("editing-row");
-    currentEditing = index;
+    currentEditing=index;
 
-    cells.forEach((cell, i) => {
+    cells.forEach((cell,i)=>{
         if(i===2){
-            const value = cell.dataset.value;
-            const options = [{% for c in classes %}'{{ c }}',{% endfor %}];
-            let select = `<select>`;
+            const value=cell.dataset.value;
+            const options=[{% for c in classes %}'{{ c }}',{% endfor %}];
+            let select=`<select>`;
             options.forEach(opt=>select+=`<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`);
             select+=`</select>`;
             cell.innerHTML=select;
         }else if(i===3){
-            const value = cell.dataset.value;
-            const options = [{% for g in groups %}'{{ g }}',{% endfor %}];
-            let select = `<select>`;
+            const value=cell.dataset.value;
+            const options=[{% for g in groups %}'{{ g }}',{% endfor %}];
+            let select=`<select>`;
             options.forEach(opt=>select+=`<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`);
             select+=`</select>`;
             cell.innerHTML=select;
@@ -329,23 +293,10 @@ function saveRow(index){
             return;
         }
     }
-    const data={
-        index:index,
-        last_name:inputs[0].value,
-        first_name:inputs[1].value,
-        class:inputs[2].value,
-        group:inputs[3].value
-    };
-    // الحقول الإضافية
-    ["evaluation1","test1","exam1","evaluation2","test2","exam2","evaluation3","test3","exam3"].forEach((f,i)=>{
-        data[f]=inputs[4+i].value;
-    });
-
-    fetch("/edit_student",{
-        method:"POST",
-        headers:{"Content-Type":"application/x-www-form-urlencoded"},
-        body:new URLSearchParams(data)
-    }).then(res=>res.json()).then(resp=>{
+    const data={index:index,last_name:inputs[0].value,first_name:inputs[1].value,class:inputs[2].value,group:inputs[3].value};
+    ["evaluation1","test1","exam1","evaluation2","test2","exam2","evaluation3","test3","exam3"].forEach((f,i)=>{data[f]=inputs[4+i].value;});
+    fetch("/edit_student",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams(data)})
+    .then(res=>res.json()).then(resp=>{
         if(resp.status==="success"){
             const cells=row.querySelectorAll("td");
             cells[0].innerText=data.last_name;
@@ -385,37 +336,18 @@ function applyFilter(){
                     (groupVal==="" || t.dataset.group===groupVal));
         t.style.display=show?"block":"none";
 
-        // إظهار/إخفاء الحقول حسب الفصل
         t.querySelectorAll("tr").forEach(tr=>{
             const ths=tr.querySelectorAll("th, td");
             if(semesterVal==="1"){
-                ths.forEach(el=>{
-                    if(el.classList.contains("sem1")) el.style.display="table-cell";
-                    else if(el.classList.contains("sem2") || el.classList.contains("sem3")) el.style.display="none";
-                    else el.style.display="table-cell";
-                });
+                ths.forEach(el=>{if(el.classList.contains("sem1")) el.style.display="table-cell"; else if(el.classList.contains("sem2")||el.classList.contains("sem3")) el.style.display="none"; else el.style.display="table-cell";});
             }else if(semesterVal==="2"){
-                ths.forEach(el=>{
-                    if(el.classList.contains("sem2")) el.style.display="table-cell";
-                    else if(el.classList.contains("sem1") || el.classList.contains("sem3")) el.style.display="none";
-                    else el.style.display="table-cell";
-                });
+                ths.forEach(el=>{if(el.classList.contains("sem2")) el.style.display="table-cell"; else if(el.classList.contains("sem1")||el.classList.contains("sem3")) el.style.display="none"; else el.style.display="table-cell";});
             }else if(semesterVal==="3"){
-                ths.forEach(el=>{
-                    if(el.classList.contains("sem3")) el.style.display="table-cell";
-                    else if(el.classList.contains("sem1") || el.classList.contains("sem2")) el.style.display="none";
-                    else el.style.display="table-cell";
-                });
+                ths.forEach(el=>{if(el.classList.contains("sem3")) el.style.display="table-cell"; else if(el.classList.contains("sem1")||el.classList.contains("sem2")) el.style.display="none"; else el.style.display="table-cell";});
             }else if(semesterVal==="all"){
-                ths.forEach(el=>{
-                    el.style.display="table-cell";
-                });
+                ths.forEach(el=>{el.style.display="table-cell";});
             }else{
-                // إذا لم يُختار فصل
-                ths.forEach(el=>{
-                    if(el.classList.contains("sem1") || el.classList.contains("sem2") || el.classList.contains("sem3")) el.style.display="none";
-                    else el.style.display="table-cell";
-                });
+                ths.forEach(el=>{if(el.classList.contains("sem1")||el.classList.contains("sem2")||el.classList.contains("sem3")) el.style.display="none"; else el.style.display="table-cell";});
             }
         });
     });
@@ -430,7 +362,6 @@ function showAll(){
 }
 function printTables(){window.print();}
 function closeArabicModal(){document.getElementById("arabicModal").style.display="none";}
-
 </script>
 
 </body>
