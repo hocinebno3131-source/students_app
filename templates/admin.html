@@ -59,17 +59,17 @@ tr:nth-child(even) { background: #f1f1f1; }
     transition: 0.3s;
 }
 
-#deleteModal, #arabicModal {
+/* نافذة الحذف */
+#deleteModal {
     display: none;
     position: fixed;
-    top: 0; left:0; right:0; bottom:0;
+    top: 0; left: 0; right:0; bottom:0;
     background: rgba(0,0,0,0.5);
     justify-content: center;
     align-items: center;
     z-index: 1000;
 }
-
-#deleteModal .modal-content, #arabicModal .modal-content {
+#deleteModal .modal-content {
     background: #ffeb3b;
     padding: 25px;
     border-radius: 12px;
@@ -79,8 +79,7 @@ tr:nth-child(even) { background: #f1f1f1; }
     font-size: 18px;
     font-weight: bold;
 }
-
-#deleteModal .modal-content button, #arabicModal .modal-content button {
+#deleteModal .modal-content button {
     margin-top: 15px;
     padding: 10px 20px;
     font-size: 16px;
@@ -90,13 +89,48 @@ tr:nth-child(even) { background: #f1f1f1; }
     cursor: pointer;
     transition: 0.3s;
 }
-
 #deleteConfirm { background: #e53935; color: white; }
 #deleteConfirm:hover { background: #b71c1c; }
-#deleteCancel, #arabicModal .modal-content button { background: #757575; color: white; }
+#deleteCancel { background: #757575; color: white; }
 #deleteCancel:hover { background: #424242; }
-#arabicModal .modal-content button:hover { background: #d32f2f; }
 
+/* التحذير العربية */
+#arabicModal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right:0; bottom:0;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+#arabicModal .modal-content {
+    background: #ffeb3b;
+    padding: 25px;
+    border-radius: 12px;
+    text-align: center;
+    max-width: 400px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    font-size: 18px;
+    font-weight: bold;
+}
+#arabicModal .modal-content button {
+    margin-top: 15px;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+    background: #f44336;
+    color: white;
+}
+#arabicModal .modal-content button:hover {
+    background: #d32f2f;
+}
+
+/* الطباعة */
 @media print {
     body * { visibility: hidden; }
     #tablesContainer, #tablesContainer * { visibility: visible; }
@@ -125,7 +159,7 @@ tr:nth-child(even) { background: #f1f1f1; }
 {% endfor %}
 </select>
 
-<select id="termFilter">
+<select id="semesterFilter">
 <option value="">اختر الفصل</option>
 <option value="1">الفصل الأول</option>
 <option value="2">الفصل الثاني</option>
@@ -153,15 +187,21 @@ tr:nth-child(even) { background: #f1f1f1; }
 <th>الاسم</th>
 <th>القسم</th>
 <th>الفوج</th>
-<th>تقويم1</th>
-<th>فرض1</th>
-<th>اختبار1</th>
-<th>تقويم2</th>
-<th>فرض2</th>
-<th>اختبار2</th>
-<th>تقويم3</th>
-<th>فرض3</th>
-<th>اختبار3</th>
+
+{% if selected_semester %}
+  {% if selected_semester == 'all' %}
+  <th>تقويم1</th><th>فرض1</th><th>اختبار1</th>
+  <th>تقويم2</th><th>فرض2</th><th>اختبار2</th>
+  <th>تقويم3</th><th>فرض3</th><th>اختبار3</th>
+  {% elif selected_semester == '1' %}
+  <th>تقويم1</th><th>فرض1</th><th>اختبار1</th>
+  {% elif selected_semester == '2' %}
+  <th>تقويم2</th><th>فرض2</th><th>اختبار2</th>
+  {% elif selected_semester == '3' %}
+  <th>تقويم3</th><th>فرض3</th><th>اختبار3</th>
+  {% endif %}
+{% endif %}
+
 <th>إجراءات</th>
 </tr>
 </thead>
@@ -173,15 +213,21 @@ tr:nth-child(even) { background: #f1f1f1; }
 <td>{{ s['first_name'] }}</td>
 <td data-value="{{ s['class'] }}">{{ s['class'] }}</td>
 <td data-value="{{ s['group'] }}">{{ s['group'] }}</td>
-<td>{{ s['evaluation1'] }}</td>
-<td>{{ s['test1'] }}</td>
-<td>{{ s['exam1'] }}</td>
-<td>{{ s['evaluation2'] }}</td>
-<td>{{ s['test2'] }}</td>
-<td>{{ s['exam2'] }}</td>
-<td>{{ s['evaluation3'] }}</td>
-<td>{{ s['test3'] }}</td>
-<td>{{ s['exam3'] }}</td>
+
+{% if selected_semester %}
+  {% if selected_semester == 'all' %}
+  <td>{{ s['evaluation1'] }}</td><td>{{ s['test1'] }}</td><td>{{ s['exam1'] }}</td>
+  <td>{{ s['evaluation2'] }}</td><td>{{ s['test2'] }}</td><td>{{ s['exam2'] }}</td>
+  <td>{{ s['evaluation3'] }}</td><td>{{ s['test3'] }}</td><td>{{ s['exam3'] }}</td>
+  {% elif selected_semester == '1' %}
+  <td>{{ s['evaluation1'] }}</td><td>{{ s['test1'] }}</td><td>{{ s['exam1'] }}</td>
+  {% elif selected_semester == '2' %}
+  <td>{{ s['evaluation2'] }}</td><td>{{ s['test2'] }}</td><td>{{ s['exam2'] }}</td>
+  {% elif selected_semester == '3' %}
+  <td>{{ s['evaluation3'] }}</td><td>{{ s['test3'] }}</td><td>{{ s['exam3'] }}</td>
+  {% endif %}
+{% endif %}
+
 <td>
 <button class="edit-btn" onclick="editRow({{ s['_index'] }})">✏️ تعديل</button>
 <button class="delete-btn" onclick="showDeleteModal({{ s['_index'] }})">🗑 حذف</button>
@@ -197,130 +243,185 @@ tr:nth-child(even) { background: #f1f1f1; }
 {% endfor %}
 </div>
 
-<!-- Modals -->
+<!-- نافذة الحذف -->
 <div id="deleteModal">
-<div class="modal-content">
-<h3>هل أنت متأكد من حذف هذا الطالب؟</h3>
-<div style="display:flex; gap:15px; justify-content:center;">
-<button id="deleteConfirm">حذف ✅</button>
-<button id="deleteCancel">إلغاء ❌</button>
-</div>
-</div>
+    <div class="modal-content">
+        <h3>هل أنت متأكد من حذف هذا الطالب؟</h3>
+        <div class="modal-buttons" style="display:flex; gap:15px; justify-content:center;">
+            <button id="deleteConfirm">حذف ✅</button>
+            <button id="deleteCancel">إلغاء ❌</button>
+        </div>
+    </div>
 </div>
 
+<!-- نافذة التحذير العربية -->
 <div id="arabicModal">
-<div class="modal-content">
-الرجاء كتابة المعلومات بالعربية فقط! ❌
-<br>
-<button onclick="closeArabicModal()">إغلاق</button>
-</div>
+    <div class="modal-content">
+        الرجاء كتابة المعلومات بالعربية فقط! ❌
+        <br>
+        <button onclick="closeArabicModal()">إغلاق</button>
+    </div>
 </div>
 
 <script>
 let currentEditing = null;
 let currentIndex = null;
+let selected_semester = "";
 
+document.getElementById("semesterFilter").addEventListener("change", (e)=>{
+    selected_semester = e.target.value;
+    applyFilter();
+});
+
+// --- التعديل ---
 function editRow(index) {
-    if(currentEditing!==null) return;
-    const row = document.getElementById("row-"+index);
+    if(currentEditing !== null) return;
+    const row = document.getElementById("row-" + index);
     const cells = row.querySelectorAll("td");
     row.classList.add("editing-row");
     currentEditing = index;
 
-    cells.forEach((cell,i)=>{
-        if(i===2){ // القسم
+    cells.forEach((cell, i) => {
+        if(i === 2){ // القسم
             const value = cell.dataset.value;
             const options = [{% for c in classes %}'{{ c }}',{% endfor %}];
-            let select = "<select>";
-            options.forEach(opt=>{select+=`<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`;});
-            select+="</select>"; cell.innerHTML=select;
-        } else if(i===3){ // الفوج
+            let select = `<select>`;
+            options.forEach(opt => {
+                select += `<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`;
+            });
+            select += `</select>`;
+            cell.innerHTML = select;
+        } else if(i === 3){ // الفوج
             const value = cell.dataset.value;
             const options = [{% for g in groups %}'{{ g }}',{% endfor %}];
-            let select = "<select>";
-            options.forEach(opt=>{select+=`<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`;});
-            select+="</select>"; cell.innerHTML=select;
-        } else if(i<cells.length-1){ // نصوص
+            let select = `<select>`;
+            options.forEach(opt => {
+                select += `<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`;
+            });
+            select += `</select>`;
+            cell.innerHTML = select;
+        } else if(i < cells.length -1){
             const text = cell.innerText;
-            cell.innerHTML=`<input type="text" value="${text}" style="width:100%">`;
+            cell.innerHTML = `<input type="text" value="${text}" style="width:100%">`;
         }
     });
-    toggleButtons(row,true);
+    toggleButtons(row, true);
 }
 
-function cancelEdit(index){
-    const row=document.getElementById("row-"+index);
-    const cells=row.querySelectorAll("td");
-    const inputs=row.querySelectorAll("input,select");
-    inputs.forEach((input,i)=>{
-        if(input.tagName==='SELECT') cells[i].innerText=input.options[input.selectedIndex].value;
-        else cells[i].innerText=input.defaultValue;
+function cancelEdit(index) {
+    const row = document.getElementById("row-" + index);
+    const cells = row.querySelectorAll("td");
+    const inputs = row.querySelectorAll("input, select");
+    inputs.forEach((input, i) => {
+        if(input.tagName==='SELECT'){
+            cells[i].innerText = input.options[input.selectedIndex].value;
+        } else {
+            cells[i].innerText = input.defaultValue;
+        }
     });
     row.classList.remove("editing-row");
-    toggleButtons(row,false);
-    currentEditing=null;
+    toggleButtons(row, false);
+    currentEditing = null;
 }
 
-function toggleButtons(row,editing){
-    const editBtn=row.querySelector(".edit-btn");
-    const deleteBtn=row.querySelector(".delete-btn");
-    const saveBtn=row.querySelector(".save-btn");
-    const cancelBtn=row.querySelector(".cancel-btn");
+function toggleButtons(row, editing) {
+    const editBtn = row.querySelector(".edit-btn");
+    const deleteBtn = row.querySelector(".delete-btn");
+    const saveBtn = row.querySelector(".save-btn");
+    const cancelBtn = row.querySelector(".cancel-btn");
     if(editing){
-        editBtn.style.display="none";
-        deleteBtn.style.display="none";
-        saveBtn.style.display="inline-block";
-        cancelBtn.style.display="inline-block";
-    } else{
-        editBtn.style.display="inline-block";
-        deleteBtn.style.display="inline-block";
-        saveBtn.style.display="none";
-        cancelBtn.style.display="none";
+        editBtn.style.display = "none";
+        deleteBtn.style.display = "none";
+        saveBtn.style.display = "inline-block";
+        cancelBtn.style.display = "inline-block";
+    } else {
+        editBtn.style.display = "inline-block";
+        deleteBtn.style.display = "inline-block";
+        saveBtn.style.display = "none";
+        cancelBtn.style.display = "none";
     }
 }
 
-function isArabic(text){ return /^[\u0600-\u06FF0-9\s]+$/.test(text); }
+function isArabic(text){
+    return /^[\u0600-\u06FF0-9\s]+$/.test(text);
+}
 
 function saveRow(index){
-    const row=document.getElementById("row-"+index);
-    const inputs=row.querySelectorAll("input,select");
+    const row = document.getElementById("row-" + index);
+    const inputs = row.querySelectorAll("input, select");
+
     for(let i=0;i<inputs.length;i++){
-        const input=inputs[i];
-        if(input.tagName==='INPUT' && input.value && !isArabic(input.value)){
-            document.getElementById("arabicModal").style.display="flex";
-            return;
+        const input = inputs[i];
+        if(input.tagName==='INPUT'){
+            if(input.value && !isArabic(input.value)){
+                document.getElementById("arabicModal").style.display = "flex";
+                return;
+            }
         }
     }
-    const data = {index:index};
-    inputs.forEach((input,i)=>{
-        const fieldMap=["last_name","first_name","class","group",
-        "evaluation1","test1","exam1","evaluation2","test2","exam2","evaluation3","test3","exam3"];
-        if(i<fieldMap.length) data[fieldMap[i]]=input.value;
-    });
 
-    fetch("/edit_student",{method:"POST",
-        headers:{"Content-Type":"application/x-www-form-urlencoded"},
+    const data = { index: index, last_name: inputs[0].value, first_name: inputs[1].value,
+        class: inputs[2].value, group: inputs[3].value };
+
+    {% for n in range(1,4) %}
+        if(selected_semester=='all' || selected_semester=='{{ n }}'){
+            if(selected_semester=='all' || selected_semester=='{{ n }}'){
+                data['evaluation{{ n }}']=inputs[{{ 4+(n-1)*3 }}]?.value || '';
+                data['test{{ n }}']=inputs[{{ 5+(n-1)*3 }}]?.value || '';
+                data['exam{{ n }}']=inputs[{{ 6+(n-1)*3 }}]?.value || '';
+            }
+        }
+    {% endfor %}
+
+    fetch("/edit_student",{
+        method:"POST",
+        headers:{ "Content-Type":"application/x-www-form-urlencoded" },
         body:new URLSearchParams(data)
     }).then(res=>res.json()).then(resp=>{
         if(resp.status==="success"){
-            const cells=row.querySelectorAll("td");
-            cells.forEach((cell,i)=>{if(i<inputs.length) cell.innerText=inputs[i].value;});
+            const cells = row.querySelectorAll("td");
+            cells[0].innerText = data.last_name;
+            cells[1].innerText = data.first_name;
+            cells[2].innerText = data.class;
+            cells[3].innerText = data.group;
+
+            {% for n in range(1,4) %}
+                if(selected_semester=='all' || selected_semester=='{{ n }}'){
+                    cells[{{ 4+(n-1)*3 }}].innerText = data['evaluation{{ n }}'];
+                    cells[{{ 5+(n-1)*3 }}].innerText = data['test{{ n }}'];
+                    cells[{{ 6+(n-1)*3 }}].innerText = data['exam{{ n }}'];
+                }
+            {% endfor %}
+
             row.classList.remove("editing-row");
             toggleButtons(row,false);
             currentEditing=null;
-        }else alert("حدث خطأ أثناء الحفظ ❌");
+        }else{
+            alert("حدث خطأ أثناء الحفظ ❌");
+        }
     });
 }
 
-function showDeleteModal(index){ currentIndex=index; document.getElementById('deleteModal').style.display='flex'; }
-document.getElementById('deleteCancel').addEventListener('click',()=>{ document.getElementById('deleteModal').style.display='none'; });
+function showDeleteModal(index){
+    currentIndex=index;
+    document.getElementById('deleteModal').style.display='flex';
+}
+document.getElementById('deleteCancel').addEventListener('click',()=>{
+    document.getElementById('deleteModal').style.display='none';
+});
 document.getElementById('deleteConfirm').addEventListener('click',()=>{
     if(currentIndex!==null){
-        fetch("/delete_student",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:"index="+currentIndex})
-        .then(res=>res.json()).then(data=>{
-            if(data.status==="success"){ const row=document.getElementById("row-"+currentIndex); if(row) row.remove(); }
-            else alert("حدث خطأ أثناء الحذف ❌");
-            document.getElementById('deleteModal').style.display='none'; currentIndex=null;
+        fetch("/delete_student",{
+            method:"POST",
+            headers:{"Content-Type":"application/x-www-form-urlencoded"},
+            body:"index="+currentIndex
+        }).then(res=>res.json()).then(data=>{
+            if(data.status==="success"){
+                const row=document.getElementById("row-"+currentIndex);
+                if(row) row.remove();
+            }else{ alert("حدث خطأ أثناء الحذف ❌"); }
+            document.getElementById('deleteModal').style.display='none';
+            currentIndex=null;
         });
     }
 });
@@ -328,28 +429,30 @@ document.getElementById('deleteConfirm').addEventListener('click',()=>{
 function applyFilter(){
     const classVal=document.getElementById("classFilter").value;
     const groupVal=document.getElementById("groupFilter").value;
-    const termVal=document.getElementById("termFilter").value;
+    const semesterVal=document.getElementById("semesterFilter").value;
 
     document.querySelectorAll(".table-wrapper").forEach(t=>{
-        t.style.display="none";
-    });
+        t.style.display=
+        ((classVal=="" || t.dataset.class===classVal) &&
+         (groupVal=="" || t.dataset.group===groupVal))?"block":"none";
 
-    if(termVal==="") return;
-
-    document.querySelectorAll(".table-wrapper").forEach(t=>{
-        const show=((classVal===""||t.dataset.class===classVal) &&
-                    (groupVal===""||t.dataset.group===groupVal));
-        if(show) t.style.display="block";
-        if(termVal!=="all") t.querySelectorAll("tbody tr").forEach(row=>{
-            const cells=row.querySelectorAll("td");
-            const evalCols=[4,7,10];
-            const testCols=[5,8,11];
-            const examCols=[6,9,12];
-            cells.forEach((c,i)=>{c.style.display="";});
-            evalCols.forEach(i=>{if(termVal==="1"&&i!==4) c.style.display="none"; else if(termVal==="2"&&i!==7) c.style.display="none"; else if(termVal==="3"&&i!==10) c.style.display="none";});
-            testCols.forEach(i=>{if(termVal==="1"&&i!==5) c.style.display="none"; else if(termVal==="2"&&i!==8) c.style.display="none"; else if(termVal==="3"&&i!==11) c.style.display="none";});
-            examCols.forEach(i=>{if(termVal==="1"&&i!==6) c.style.display="none"; else if(termVal==="2"&&i!==9) c.style.display="none"; else if(termVal==="3"&&i!==12) c.style.display="none";});
-        });
+        // إخفاء الأعمدة إذا لم يتم اختيار الفصل
+        const showCols = semesterVal && semesterVal!="";
+        const ths = t.querySelectorAll("th");
+        const trs = t.querySelectorAll("tbody tr");
+        if(!showCols){
+            for(let i=4;i<ths.length-1;i++) ths[i].style.display="none";
+            trs.forEach(tr=>{
+                const tds = tr.querySelectorAll("td");
+                for(let i=4;i<tds.length-1;i++) tds[i].style.display="none";
+            });
+        }else{
+            for(let i=4;i<ths.length-1;i++) ths[i].style.display="";
+            trs.forEach(tr=>{
+                const tds = tr.querySelectorAll("td");
+                for(let i=4;i<tds.length-1;i++) tds[i].style.display="";
+            });
+        }
     });
 }
 
@@ -357,11 +460,14 @@ function showAll(){
     document.querySelectorAll(".table-wrapper").forEach(t=>t.style.display="block");
     document.getElementById("classFilter").value="";
     document.getElementById("groupFilter").value="";
-    document.getElementById("termFilter").value="";
+    document.getElementById("semesterFilter").value="";
+    applyFilter();
 }
+
 function printTables(){ window.print(); }
 function closeArabicModal(){ document.getElementById("arabicModal").style.display="none"; }
 
 </script>
 </body>
 </html>
+
