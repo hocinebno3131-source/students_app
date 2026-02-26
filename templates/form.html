@@ -137,9 +137,6 @@ input:focus, select:focus {
             <option value="الفوج2">الفوج2</option>
         </select>
 
-        <input type="text" name="phone" placeholder="رقم الهاتف" required>
-        <input type="text" name="note" placeholder="ملاحظة">
-
         <div class="buttons">
             <button type="submit" id="submitBtn">إرسال</button>
             <button type="button" id="cancelBtn" onclick="window.location.href='/'">إلغاء / خروج</button>
@@ -165,9 +162,8 @@ function isArabic(text) {
 document.getElementById("studentForm").addEventListener("submit", function(e){
     const lastName = this.last_name.value.trim();
     const firstName = this.first_name.value.trim();
-    const note = this.note.value.trim();
 
-    if(!isArabic(lastName) || !isArabic(firstName) || (note && !isArabic(note))) {
+    if(!isArabic(lastName) || !isArabic(firstName)) {
         e.preventDefault(); // منع الإرسال
         document.getElementById("arabicModal").style.display = "flex";
     }
