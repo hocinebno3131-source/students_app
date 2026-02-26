@@ -54,13 +54,14 @@ tr:nth-child(even) { background: #f1f1f1; }
 
 .table-title { margin: 15px 0 5px 0; font-size: 18px; font-weight: bold; }
 
+/* صف في وضع التعديل */
 .editing-row {
     background-color: #fff9c4 !important;
     transition: 0.3s;
 }
 
 /* نافذة الحذف */
-#deleteModal {
+#deleteModal, #arabicModal {
     display: none;
     position: fixed;
     top: 0; left: 0; right:0; bottom:0;
@@ -69,8 +70,7 @@ tr:nth-child(even) { background: #f1f1f1; }
     align-items: center;
     z-index: 1000;
 }
-#deleteModal .modal-content {
-    background: #ffeb3b;
+#deleteModal .modal-content, #arabicModal .modal-content {
     padding: 25px;
     border-radius: 12px;
     text-align: center;
@@ -79,7 +79,7 @@ tr:nth-child(even) { background: #f1f1f1; }
     font-size: 18px;
     font-weight: bold;
 }
-#deleteModal .modal-content button {
+#deleteModal .modal-content button, #arabicModal .modal-content button {
     margin-top: 15px;
     padding: 10px 20px;
     font-size: 16px;
@@ -93,42 +93,8 @@ tr:nth-child(even) { background: #f1f1f1; }
 #deleteConfirm:hover { background: #b71c1c; }
 #deleteCancel { background: #757575; color: white; }
 #deleteCancel:hover { background: #424242; }
-
-/* التحذير العربية */
-#arabicModal {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; right:0; bottom:0;
-    background: rgba(0,0,0,0.5);
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-#arabicModal .modal-content {
-    background: #ffeb3b;
-    padding: 25px;
-    border-radius: 12px;
-    text-align: center;
-    max-width: 400px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-    font-size: 18px;
-    font-weight: bold;
-}
-#arabicModal .modal-content button {
-    margin-top: 15px;
-    padding: 10px 20px;
-    font-size: 16px;
-    font-weight: bold;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: 0.3s;
-    background: #f44336;
-    color: white;
-}
-#arabicModal .modal-content button:hover {
-    background: #d32f2f;
-}
+#arabicModal .modal-content button { background: #f44336; color: white; }
+#arabicModal .modal-content button:hover { background: #d32f2f; }
 
 /* الطباعة */
 @media print {
@@ -147,23 +113,19 @@ tr:nth-child(even) { background: #f1f1f1; }
 <div class="filters">
 <select id="classFilter">
 <option value="">اختر القسم</option>
-{% for c in classes %}
-<option value="{{ c }}">{{ c }}</option>
-{% endfor %}
+{% for c in classes %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
 </select>
 
 <select id="groupFilter">
 <option value="">اختر الفوج</option>
-{% for g in groups %}
-<option value="{{ g }}">{{ g }}</option>
-{% endfor %}
+{% for g in groups %}<option value="{{ g }}">{{ g }}</option>{% endfor %}
 </select>
 
 <select id="semesterFilter">
 <option value="">اختر الفصل</option>
-<option value="1">الفصل الأول</option>
-<option value="2">الفصل الثاني</option>
-<option value="3">الفصل الثالث</option>
+<option value="1">الفصل 1</option>
+<option value="2">الفصل 2</option>
+<option value="3">الفصل 3</option>
 <option value="all">الكل</option>
 </select>
 
@@ -187,21 +149,18 @@ tr:nth-child(even) { background: #f1f1f1; }
 <th>الاسم</th>
 <th>القسم</th>
 <th>الفوج</th>
-
-{% if selected_semester %}
-  {% if selected_semester == 'all' %}
-  <th>تقويم1</th><th>فرض1</th><th>اختبار1</th>
-  <th>تقويم2</th><th>فرض2</th><th>اختبار2</th>
-  <th>تقويم3</th><th>فرض3</th><th>اختبار3</th>
-  {% elif selected_semester == '1' %}
-  <th>تقويم1</th><th>فرض1</th><th>اختبار1</th>
-  {% elif selected_semester == '2' %}
-  <th>تقويم2</th><th>فرض2</th><th>اختبار2</th>
-  {% elif selected_semester == '3' %}
-  <th>تقويم3</th><th>فرض3</th><th>اختبار3</th>
-  {% endif %}
-{% endif %}
-
+<!-- أعمدة الفصل1 -->
+<th class="sem1">تقويم1</th>
+<th class="sem1">فرض1</th>
+<th class="sem1">اختبار1</th>
+<!-- أعمدة الفصل2 -->
+<th class="sem2">تقويم2</th>
+<th class="sem2">فرض2</th>
+<th class="sem2">اختبار2</th>
+<!-- أعمدة الفصل3 -->
+<th class="sem3">تقويم3</th>
+<th class="sem3">فرض3</th>
+<th class="sem3">اختبار3</th>
 <th>إجراءات</th>
 </tr>
 </thead>
@@ -213,21 +172,15 @@ tr:nth-child(even) { background: #f1f1f1; }
 <td>{{ s['first_name'] }}</td>
 <td data-value="{{ s['class'] }}">{{ s['class'] }}</td>
 <td data-value="{{ s['group'] }}">{{ s['group'] }}</td>
-
-{% if selected_semester %}
-  {% if selected_semester == 'all' %}
-  <td>{{ s['evaluation1'] }}</td><td>{{ s['test1'] }}</td><td>{{ s['exam1'] }}</td>
-  <td>{{ s['evaluation2'] }}</td><td>{{ s['test2'] }}</td><td>{{ s['exam2'] }}</td>
-  <td>{{ s['evaluation3'] }}</td><td>{{ s['test3'] }}</td><td>{{ s['exam3'] }}</td>
-  {% elif selected_semester == '1' %}
-  <td>{{ s['evaluation1'] }}</td><td>{{ s['test1'] }}</td><td>{{ s['exam1'] }}</td>
-  {% elif selected_semester == '2' %}
-  <td>{{ s['evaluation2'] }}</td><td>{{ s['test2'] }}</td><td>{{ s['exam2'] }}</td>
-  {% elif selected_semester == '3' %}
-  <td>{{ s['evaluation3'] }}</td><td>{{ s['test3'] }}</td><td>{{ s['exam3'] }}</td>
-  {% endif %}
-{% endif %}
-
+<td class="sem1">{{ s['evaluation1'] }}</td>
+<td class="sem1">{{ s['test1'] }}</td>
+<td class="sem1">{{ s['exam1'] }}</td>
+<td class="sem2">{{ s['evaluation2'] }}</td>
+<td class="sem2">{{ s['test2'] }}</td>
+<td class="sem2">{{ s['exam2'] }}</td>
+<td class="sem3">{{ s['evaluation3'] }}</td>
+<td class="sem3">{{ s['test3'] }}</td>
+<td class="sem3">{{ s['exam3'] }}</td>
 <td>
 <button class="edit-btn" onclick="editRow({{ s['_index'] }})">✏️ تعديل</button>
 <button class="delete-btn" onclick="showDeleteModal({{ s['_index'] }})">🗑 حذف</button>
@@ -243,18 +196,17 @@ tr:nth-child(even) { background: #f1f1f1; }
 {% endfor %}
 </div>
 
-<!-- نافذة الحذف -->
+<!-- النماذج والباقي -->
 <div id="deleteModal">
     <div class="modal-content">
         <h3>هل أنت متأكد من حذف هذا الطالب؟</h3>
-        <div class="modal-buttons" style="display:flex; gap:15px; justify-content:center;">
+        <div style="display:flex; gap:15px; justify-content:center;">
             <button id="deleteConfirm">حذف ✅</button>
             <button id="deleteCancel">إلغاء ❌</button>
         </div>
     </div>
 </div>
 
-<!-- نافذة التحذير العربية -->
 <div id="arabicModal">
     <div class="modal-content">
         الرجاء كتابة المعلومات بالعربية فقط! ❌
@@ -266,63 +218,6 @@ tr:nth-child(even) { background: #f1f1f1; }
 <script>
 let currentEditing = null;
 let currentIndex = null;
-let selected_semester = "";
-
-document.getElementById("semesterFilter").addEventListener("change", (e)=>{
-    selected_semester = e.target.value;
-    applyFilter();
-});
-
-// --- التعديل ---
-function editRow(index) {
-    if(currentEditing !== null) return;
-    const row = document.getElementById("row-" + index);
-    const cells = row.querySelectorAll("td");
-    row.classList.add("editing-row");
-    currentEditing = index;
-
-    cells.forEach((cell, i) => {
-        if(i === 2){ // القسم
-            const value = cell.dataset.value;
-            const options = [{% for c in classes %}'{{ c }}',{% endfor %}];
-            let select = `<select>`;
-            options.forEach(opt => {
-                select += `<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`;
-            });
-            select += `</select>`;
-            cell.innerHTML = select;
-        } else if(i === 3){ // الفوج
-            const value = cell.dataset.value;
-            const options = [{% for g in groups %}'{{ g }}',{% endfor %}];
-            let select = `<select>`;
-            options.forEach(opt => {
-                select += `<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`;
-            });
-            select += `</select>`;
-            cell.innerHTML = select;
-        } else if(i < cells.length -1){
-            const text = cell.innerText;
-            cell.innerHTML = `<input type="text" value="${text}" style="width:100%">`;
-        }
-    });
-    toggleButtons(row, true);
-}
-
-function cancelEdit(index) {
-    const row = document.getElementById("row-" + index);
-    const cells = row.querySelectorAll("td");
-    const inputs = row.querySelectorAll("input, select");
-    inputs.forEach((input, i) => {
-        if(input.tagName==='SELECT'){
-            cells[i].innerText = input.options[input.selectedIndex].value;
-        } else {
-            cells[i].innerText = input.defaultValue;
-        }
-    });
-    row.classList.remove("editing-row");
-    toggleButtons(row, false);
-    currentEditing = null;
-}
 
 function toggleButtons(row, editing) {
     const editBtn = row.querySelector(".edit-btn");
@@ -342,132 +237,47 @@ function toggleButtons(row, editing) {
     }
 }
 
-function isArabic(text){
-    return /^[\u0600-\u06FF0-9\s]+$/.test(text);
-}
+// --- الفلترة حسب القسم، الفوج والفصل ---
+function applyFilter(){
+    const classVal = document.getElementById("classFilter").value;
+    const groupVal = document.getElementById("groupFilter").value;
+    const semVal = document.getElementById("semesterFilter").value;
 
-function saveRow(index){
-    const row = document.getElementById("row-" + index);
-    const inputs = row.querySelectorAll("input, select");
-
-    for(let i=0;i<inputs.length;i++){
-        const input = inputs[i];
-        if(input.tagName==='INPUT'){
-            if(input.value && !isArabic(input.value)){
-                document.getElementById("arabicModal").style.display = "flex";
-                return;
-            }
-        }
-    }
-
-    const data = { index: index, last_name: inputs[0].value, first_name: inputs[1].value,
-        class: inputs[2].value, group: inputs[3].value };
-
-    {% for n in range(1,4) %}
-        if(selected_semester=='all' || selected_semester=='{{ n }}'){
-            if(selected_semester=='all' || selected_semester=='{{ n }}'){
-                data['evaluation{{ n }}']=inputs[{{ 4+(n-1)*3 }}]?.value || '';
-                data['test{{ n }}']=inputs[{{ 5+(n-1)*3 }}]?.value || '';
-                data['exam{{ n }}']=inputs[{{ 6+(n-1)*3 }}]?.value || '';
-            }
-        }
-    {% endfor %}
-
-    fetch("/edit_student",{
-        method:"POST",
-        headers:{ "Content-Type":"application/x-www-form-urlencoded" },
-        body:new URLSearchParams(data)
-    }).then(res=>res.json()).then(resp=>{
-        if(resp.status==="success"){
-            const cells = row.querySelectorAll("td");
-            cells[0].innerText = data.last_name;
-            cells[1].innerText = data.first_name;
-            cells[2].innerText = data.class;
-            cells[3].innerText = data.group;
-
-            {% for n in range(1,4) %}
-                if(selected_semester=='all' || selected_semester=='{{ n }}'){
-                    cells[{{ 4+(n-1)*3 }}].innerText = data['evaluation{{ n }}'];
-                    cells[{{ 5+(n-1)*3 }}].innerText = data['test{{ n }}'];
-                    cells[{{ 6+(n-1)*3 }}].innerText = data['exam{{ n }}'];
-                }
-            {% endfor %}
-
-            row.classList.remove("editing-row");
-            toggleButtons(row,false);
-            currentEditing=null;
-        }else{
-            alert("حدث خطأ أثناء الحفظ ❌");
+    document.querySelectorAll(".table-wrapper").forEach(t=>{
+        const showRow = ((classVal==="" || t.dataset.class===classVal) &&
+                        (groupVal==="" || t.dataset.group===groupVal));
+        t.style.display = showRow ? "block" : "none";
+        t.querySelectorAll("th, td").forEach(cell=>{
+            cell.style.display = "table-cell"; // إظهار أولاً
+        });
+        // إخفاء أعمدة الفصل غير المختار
+        if(semVal === "1"){ showSemester(1); }
+        else if(semVal === "2"){ showSemester(2); }
+        else if(semVal === "3"){ showSemester(3); }
+        else if(semVal === "all"){ showSemester(1,true); showSemester(2,true); showSemester(3,true); }
+        else if(semVal===""){ // إذا لم يتم اختيار الفصل نخبّي جميع الأعمدة
+            showSemester(1,false); showSemester(2,false); showSemester(3,false);
         }
     });
 }
 
-function showDeleteModal(index){
-    currentIndex=index;
-    document.getElementById('deleteModal').style.display='flex';
-}
-document.getElementById('deleteCancel').addEventListener('click',()=>{
-    document.getElementById('deleteModal').style.display='none';
-});
-document.getElementById('deleteConfirm').addEventListener('click',()=>{
-    if(currentIndex!==null){
-        fetch("/delete_student",{
-            method:"POST",
-            headers:{"Content-Type":"application/x-www-form-urlencoded"},
-            body:"index="+currentIndex
-        }).then(res=>res.json()).then(data=>{
-            if(data.status==="success"){
-                const row=document.getElementById("row-"+currentIndex);
-                if(row) row.remove();
-            }else{ alert("حدث خطأ أثناء الحذف ❌"); }
-            document.getElementById('deleteModal').style.display='none';
-            currentIndex=null;
-        });
-    }
-});
-
-function applyFilter(){
-    const classVal=document.getElementById("classFilter").value;
-    const groupVal=document.getElementById("groupFilter").value;
-    const semesterVal=document.getElementById("semesterFilter").value;
-
-    document.querySelectorAll(".table-wrapper").forEach(t=>{
-        t.style.display=
-        ((classVal=="" || t.dataset.class===classVal) &&
-         (groupVal=="" || t.dataset.group===groupVal))?"block":"none";
-
-        // إخفاء الأعمدة إذا لم يتم اختيار الفصل
-        const showCols = semesterVal && semesterVal!="";
-        const ths = t.querySelectorAll("th");
-        const trs = t.querySelectorAll("tbody tr");
-        if(!showCols){
-            for(let i=4;i<ths.length-1;i++) ths[i].style.display="none";
-            trs.forEach(tr=>{
-                const tds = tr.querySelectorAll("td");
-                for(let i=4;i<tds.length-1;i++) tds[i].style.display="none";
-            });
-        }else{
-            for(let i=4;i<ths.length-1;i++) ths[i].style.display="";
-            trs.forEach(tr=>{
-                const tds = tr.querySelectorAll("td");
-                for(let i=4;i<tds.length-1;i++) tds[i].style.display="";
-            });
-        }
+function showSemester(num, show=true){
+    document.querySelectorAll(".sem"+num).forEach(c=>{
+        c.style.display = show ? "table-cell" : "none";
     });
 }
 
 function showAll(){
     document.querySelectorAll(".table-wrapper").forEach(t=>t.style.display="block");
+    showSemester(1,false); showSemester(2,false); showSemester(3,false);
     document.getElementById("classFilter").value="";
     document.getElementById("groupFilter").value="";
     document.getElementById("semesterFilter").value="";
-    applyFilter();
 }
 
 function printTables(){ window.print(); }
 function closeArabicModal(){ document.getElementById("arabicModal").style.display="none"; }
-
 </script>
+
 </body>
 </html>
-
