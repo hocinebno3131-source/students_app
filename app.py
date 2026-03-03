@@ -22,8 +22,8 @@ def read_students():
 # -------------------------
 def write_students(students):
     with open(CSV_FILE, "w", newline="", encoding="utf-8-sig") as f:
-        # حذف phone من الحقول
-        fieldnames = ["last_name","first_name","class","group","note"]
+        fieldnames = ["last_name","first_name","class","group","test1","exam1","evaluation1",
+                      "test2","exam2","evaluation2","test3","exam3","evaluation3","observation"]
         writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter=";")
         writer.writeheader()
         writer.writerows(students)
@@ -38,7 +38,7 @@ def form():
         first_name = request.form["first_name"].strip()
         class_name = request.form["class"].strip()
         group = request.form["group"].strip()
-        note = request.form.get("note","").strip()  # note اختياري
+        observation = request.form.get("note","").strip()  # ربط بالملاحظة
 
         students = read_students()
 
@@ -52,13 +52,29 @@ def form():
             ):
                 return redirect("/?duplicate=1")
 
-        data = [last_name, first_name, class_name, group, note]
+        # إعداد صف البيانات الجديد
+        data = {
+            "last_name": last_name,
+            "first_name": first_name,
+            "class": class_name,
+            "group": group,
+            "test1": "",
+            "exam1": "",
+            "evaluation1": "",
+            "test2": "",
+            "exam2": "",
+            "evaluation2": "",
+            "test3": "",
+            "exam3": "",
+            "evaluation3": "",
+            "observation": observation
+        }
 
         file_exists = os.path.exists(CSV_FILE)
         with open(CSV_FILE, "a", newline="", encoding="utf-8-sig") as f:
-            writer = csv.writer(f, delimiter=";")
+            writer = csv.DictWriter(f, fieldnames=data.keys(), delimiter=";")
             if not file_exists:
-                writer.writerow(["last_name","first_name","class","group","note"])
+                writer.writeheader()
             writer.writerow(data)
 
         return redirect("/success")
@@ -75,7 +91,6 @@ def success():
 # -------------------------
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
-
     if request.method == "GET":
         return render_template("admin_password.html", message="")
 
@@ -84,10 +99,8 @@ def admin():
         return render_template("admin_password.html", message="كلمة المرور غير صحيحة ❌")
 
     students = read_students()
-
     grouped = defaultdict(list)
 
-    # نضيف index لكل طالب (مهم للحذف والتعديل)
     for i, s in enumerate(students):
         s["_index"] = i
         key = f"{s['class']} — {s['group']}"
@@ -138,7 +151,7 @@ def edit_student():
         first_name = request.form.get("first_name").strip()
         class_name = request.form.get("class").strip()
         group = request.form.get("group").strip()
-        note = request.form.get("note","").strip()
+        observation = request.form.get("note","").strip()
     except:
         return jsonify({"status":"error", "message":"بيانات غير صحيحة"})
 
@@ -148,7 +161,7 @@ def edit_student():
         students[index]["first_name"] = first_name
         students[index]["class"] = class_name
         students[index]["group"] = group
-        students[index]["note"] = note
+        students[index]["observation"] = observation
 
         write_students(students)
         return jsonify({"status":"success"})
