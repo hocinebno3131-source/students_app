@@ -21,9 +21,14 @@ def read_students():
 # إعادة كتابة الملف بعد التعديل أو الحذف
 # -------------------------
 def write_students(students):
+    fieldnames = [
+        "last_name","first_name","class","group",
+        "test1","exam1","evaluation1",
+        "test2","exam2","evaluation2",
+        "test3","exam3","evaluation3",
+        "observation"
+    ]
     with open(CSV_FILE, "w", newline="", encoding="utf-8-sig") as f:
-        fieldnames = ["last_name","first_name","class","group","test1","exam1","evaluation1",
-                      "test2","exam2","evaluation2","test3","exam3","evaluation3","observation"]
         writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter=";")
         writer.writeheader()
         writer.writerows(students)
@@ -152,16 +157,36 @@ def edit_student():
         class_name = request.form.get("class").strip()
         group = request.form.get("group").strip()
         observation = request.form.get("note","").strip()
+        # الحقول الجديدة لكل اختبار
+        test1 = request.form.get("test1","").strip()
+        exam1 = request.form.get("exam1","").strip()
+        evaluation1 = request.form.get("evaluation1","").strip()
+        test2 = request.form.get("test2","").strip()
+        exam2 = request.form.get("exam2","").strip()
+        evaluation2 = request.form.get("evaluation2","").strip()
+        test3 = request.form.get("test3","").strip()
+        exam3 = request.form.get("exam3","").strip()
+        evaluation3 = request.form.get("evaluation3","").strip()
     except:
         return jsonify({"status":"error", "message":"بيانات غير صحيحة"})
 
     students = read_students()
     if 0 <= index < len(students):
-        students[index]["last_name"] = last_name
-        students[index]["first_name"] = first_name
-        students[index]["class"] = class_name
-        students[index]["group"] = group
-        students[index]["observation"] = observation
+        s = students[index]
+        s["last_name"] = last_name
+        s["first_name"] = first_name
+        s["class"] = class_name
+        s["group"] = group
+        s["observation"] = observation
+        s["test1"] = test1
+        s["exam1"] = exam1
+        s["evaluation1"] = evaluation1
+        s["test2"] = test2
+        s["exam2"] = exam2
+        s["evaluation2"] = evaluation2
+        s["test3"] = test3
+        s["exam3"] = exam3
+        s["evaluation3"] = evaluation3
 
         write_students(students)
         return jsonify({"status":"success"})
