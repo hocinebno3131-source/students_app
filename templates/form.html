@@ -83,7 +83,7 @@ input:focus, select:focus {
     z-index: 1000;
 }
 #arabicModal .modal-content {
-    background: #ffeb3b; /* لون الجيلو */
+    background: #ffeb3b; 
     padding: 25px;
     border-radius: 12px;
     text-align: center;
@@ -103,7 +103,7 @@ input:focus, select:focus {
     transition: 0.3s;
 }
 #arabicModal .modal-content button#closeModal {
-    background: #f44336; /* أحمر لإغلاق */
+    background: #f44336; 
     color: white;
 }
 #arabicModal .modal-content button#closeModal:hover {
@@ -167,7 +167,7 @@ document.getElementById("studentForm").addEventListener("submit", function(e){
     const note = this.note.value.trim();
 
     if(!isArabic(lastName) || !isArabic(firstName) || (note && !isArabic(note))) {
-        e.preventDefault(); // منع الإرسال
+        e.preventDefault(); 
         document.getElementById("arabicModal").style.display = "flex";
     }
 });
