@@ -22,7 +22,8 @@ def read_students():
 # -------------------------
 def write_students(students):
     with open(CSV_FILE, "w", newline="", encoding="utf-8-sig") as f:
-        fieldnames = ["last_name","first_name","class","group","phone","note"]
+        # حذف phone من الحقول
+        fieldnames = ["last_name","first_name","class","group","note"]
         writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter=";")
         writer.writeheader()
         writer.writerows(students)
@@ -33,13 +34,11 @@ def write_students(students):
 @app.route("/", methods=["GET", "POST"])
 def form():
     if request.method == "POST":
-
         last_name = request.form["last_name"].strip()
         first_name = request.form["first_name"].strip()
         class_name = request.form["class"].strip()
         group = request.form["group"].strip()
-        phone = request.form["phone"].strip()
-        note = request.form["note"].strip()
+        note = request.form.get("note","").strip()  # note اختياري
 
         students = read_students()
 
@@ -53,13 +52,13 @@ def form():
             ):
                 return redirect("/?duplicate=1")
 
-        data = [last_name, first_name, class_name, group, phone, note]
+        data = [last_name, first_name, class_name, group, note]
 
         file_exists = os.path.exists(CSV_FILE)
         with open(CSV_FILE, "a", newline="", encoding="utf-8-sig") as f:
             writer = csv.writer(f, delimiter=";")
             if not file_exists:
-                writer.writerow(["last_name","first_name","class","group","phone","note"])
+                writer.writerow(["last_name","first_name","class","group","note"])
             writer.writerow(data)
 
         return redirect("/success")
@@ -139,8 +138,7 @@ def edit_student():
         first_name = request.form.get("first_name").strip()
         class_name = request.form.get("class").strip()
         group = request.form.get("group").strip()
-        phone = request.form.get("phone").strip()
-        note = request.form.get("note").strip()
+        note = request.form.get("note","").strip()
     except:
         return jsonify({"status":"error", "message":"بيانات غير صحيحة"})
 
@@ -150,7 +148,6 @@ def edit_student():
         students[index]["first_name"] = first_name
         students[index]["class"] = class_name
         students[index]["group"] = group
-        students[index]["phone"] = phone
         students[index]["note"] = note
 
         write_students(students)
