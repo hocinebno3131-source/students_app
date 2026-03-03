@@ -8,6 +8,14 @@ app = Flask(__name__)
 CSV_FILE = "students.csv"
 ADMIN_PASSWORD = "admin123"
 
+# الحقول الثابتة لجميع الطلاب
+FIELDNAMES = [
+    "last_name","first_name","class","group",
+    "test1","exam1","evaluation1",
+    "test2","exam2","evaluation2",
+    "test3","exam3","evaluation3"
+]
+
 # -------------------------
 # قراءة كل الطلبة
 # -------------------------
@@ -18,18 +26,16 @@ def read_students():
         return list(csv.DictReader(f, delimiter=";"))
 
 # -------------------------
-# إعادة كتابة الملف بعد التعديل أو الحذف
+# إعادة كتابة الملف بعد التعديل أو الإضافة
 # -------------------------
 def write_students(students):
+    # تأكد من وجود كل الحقول لكل طالب
+    for s in students:
+        for field in FIELDNAMES:
+            if field not in s:
+                s[field] = ""
     with open(CSV_FILE, "w", newline="", encoding="utf-8-sig") as f:
-        # الحقول الجديدة حسب CSV الجديد
-        fieldnames = [
-            "last_name","first_name","class","group",
-            "test1","exam1","evaluation1",
-            "test2","exam2","evaluation2",
-            "test3","exam3","evaluation3"
-        ]
-        writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter=";")
+        writer = csv.DictWriter(f, fieldnames=FIELDNAMES, delimiter=";")
         writer.writeheader()
         writer.writerows(students)
 
@@ -56,7 +62,8 @@ def form():
             ):
                 return redirect("/?duplicate=1")
 
-        data = {
+        # الطالب الجديد مع كل الحقول
+        new_student = {
             "last_name": last_name,
             "first_name": first_name,
             "class": class_name,
@@ -72,12 +79,8 @@ def form():
             "evaluation3": ""
         }
 
-        file_exists = os.path.exists(CSV_FILE)
-        with open(CSV_FILE, "a", newline="", encoding="utf-8-sig") as f:
-            writer = csv.DictWriter(f, fieldnames=data.keys(), delimiter=";")
-            if not file_exists:
-                writer.writeheader()
-            writer.writerow(data)
+        students.append(new_student)  # إضافة الطالب للقائمة
+        write_students(students)      # إعادة كتابة الملف بالكامل
 
         return redirect("/success")
 
