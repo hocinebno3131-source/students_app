@@ -35,9 +35,10 @@ function editRow(index) {
             options.forEach(opt => select += `<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`);
             select += `</select>`;
             cell.innerHTML = select;
-        } else if (i < cells.length - 1) {
-            const text = cell.innerText;
-            cell.innerHTML = `<input type="text" value="${text}" style="width:100%">`;
+        } else if(i >= 4 && i <= 13){  // الأعمدة من 4 إلى 13 تشمل الاختبارات والملاحظة
+    const text=cell.innerText;
+    cell.innerHTML=`<input type="text" value="${text}" style="width:100%">`;
+}
         }
     });
     toggleButtons(row, true);
