@@ -125,59 +125,6 @@ function isArabic(text) {
     return /^[\u0600-\u06FF0-9\s]+$/.test(text);
 }
 
-// --- حفظ الصف ---
-function saveRow(index) {
-    const row = document.getElementById("row-" + index);
-    const inputs = row.querySelectorAll("input, select");
-
-    // تحقق من اللغة
-    for (let i = 0; i < inputs.length; i++) {
-        const input = inputs[i];
-        if (input.tagName === 'INPUT' && input.value && !isArabic(input.value)) {
-            document.getElementById("arabicModal").style.display = "flex";
-            return;
-        }
-    }
-
-    // تجميع البيانات
-   const data = {
-    index: index,
-    last_name: inputs[0].value,
-    first_name: inputs[1].value,
-    class: inputs[2].value,
-    group: inputs[3].value,
-    evaluation1: inputs[4].value,
-    test1: inputs[5].value,
-    exam1: inputs[6].value,
-    evaluation2: inputs[7].value,
-    test2: inputs[8].value,
-    exam2: inputs[9].value,
-    evaluation3: inputs[10].value,
-    test3: inputs[11].value,
-    exam3: inputs[12].value,
-   observation: inputs[13].value 
-}; 
-
-    fetch("/edit_student", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams(data)
-    })
-    .then(res => res.json())
-    .then(resp => {
-        if (resp.status === "success") {
-            const cells = row.querySelectorAll("td");
-            cells[0].innerText = data.last_name;
-            cells[1].innerText = data.first_name;
-            cells[2].innerText = data.class;
-            cells[3].innerText = data.group;
-            for (let i = 4; i <= 12; i++) cells[i].innerText = inputs[i].value;
-            row.classList.remove("editing-row");
-            toggleButtons(row, false);
-            currentEditing = null;
-        } else alert("حدث خطأ أثناء الحفظ ❌");
-    });
-}
 
 // --- حذف الطالب ---
 function showDeleteModal(index) {
