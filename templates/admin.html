@@ -296,7 +296,8 @@ function saveRow(index){
             return;
         }
     }
-    const data={index:index,last_name:inputs[0].value,first_name:inputs[1].value,class:inputs[2].value,group:inputs[3].value};
+    const data={index:index,last_name:inputs[0].value,first_name:inputs[1].value,class:inputs[2].value,group:inputs[3].value,
+    observation: inputs[13] ? inputs[13].value : "" };
     ["evaluation1","test1","exam1","evaluation2","test2","exam2","evaluation3","test3","exam3"].forEach((f,i)=>{data[f]=inputs[4+i].value;});
     fetch("/edit_student",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams(data)})
     .then(res=>res.json()).then(resp=>{
