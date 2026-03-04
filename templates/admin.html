@@ -308,6 +308,7 @@ function saveRow(index){
             cells[2].innerText=data.class;
             cells[3].innerText=data.group;
             for(let i=0;i<9;i++) cells[4+i].innerText=inputs[4+i].value;
+            cells[13].innerText = data.observation;
             row.classList.remove("editing-row");
             toggleButtons(row,false);
             currentEditing=null;
