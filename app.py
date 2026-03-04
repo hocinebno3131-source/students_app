@@ -161,7 +161,16 @@ def edit_student():
         students[index]["first_name"] = first_name
         students[index]["class"] = class_name
         students[index]["group"] = group
-        students[index]["observation"] = observation
+        students[index]["test1"] = test1
+students[index]["exam1"] = exam1
+students[index]["evaluation1"] = evaluation1
+students[index]["test2"] = test2
+students[index]["exam2"] = exam2
+students[index]["evaluation2"] = evaluation2
+students[index]["test3"] = test3
+students[index]["exam3"] = exam3
+students[index]["evaluation3"] = evaluation3
+students[index]["observation"] = observation
 
         write_students(students)
         return jsonify({"status":"success"})
