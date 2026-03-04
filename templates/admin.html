@@ -290,6 +290,7 @@ function saveRow(index){
     const row = document.getElementById("row-" + index);
     const inputs = row.querySelectorAll("input, select");
 
+    // تحقق من الكتابة بالعربية
     for(let i=0; i<inputs.length; i++){
         const input = inputs[i];
         if(input.tagName === 'INPUT' && input.value && !isArabic(input.value)){
@@ -298,22 +299,21 @@ function saveRow(index){
         }
     }
 
-    // تعديل هنا: استخدم آخر input للملاحظة
-    const observationInput = inputs[inputs.length - 1].value;
-
+    // جمع البيانات
     const data = {
         index: index,
         last_name: inputs[0].value,
         first_name: inputs[1].value,
         class: inputs[2].value,
         group: inputs[3].value,
-        observation: observationInput
+        observation: inputs[inputs.length - 1].value // آخر حقل دائمًا للملاحظة
     };
 
     ["evaluation1","test1","exam1","evaluation2","test2","exam2","evaluation3","test3","exam3"].forEach((f,i)=>{
-        data[f] = inputs[4 + i].value;
+        data[f] = inputs[4+i].value;
     });
 
+    // إرسال البيانات إلى السيرفر
     fetch("/edit_student", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -327,12 +327,14 @@ function saveRow(index){
             cells[1].innerText = data.first_name;
             cells[2].innerText = data.class;
             cells[3].innerText = data.group;
-            for(let i=0;i<9;i++) cells[4+i].innerText = inputs[4+i].value;
-            cells[cells.length - 2].innerText = data.observation; // الملاحظة دائمًا قبل آخر عمود (الإجراءات)
+            for(let i=0; i<9; i++) cells[4+i].innerText = inputs[4+i].value;
+            cells[cells.length - 2].innerText = data.observation; // آخر حقل قبل إجراءات
             row.classList.remove("editing-row");
-            toggleButtons(row,false);
+            toggleButtons(row, false);
             currentEditing = null;
-        } else alert("حدث خطأ أثناء الحفظ ❌");
+        } else {
+            alert("حدث خطأ أثناء الحفظ ❌");
+        }
     });
 }
 
