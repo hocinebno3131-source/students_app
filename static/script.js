@@ -93,23 +93,23 @@ function saveRow(index) {
     }
 
     // تجميع البيانات
-    const data = {
-        index: index,
-        last_name: inputs[0].value,
-        first_name: inputs[1].value,
-        class: inputs[2].value,
-        group: inputs[3].value,
-        evaluation1: inputs[4].value,
-        test1: inputs[5].value,
-        exam1: inputs[6].value,
-        evaluation2: inputs[7].value,
-        test2: inputs[8].value,
-        exam2: inputs[9].value,
-        evaluation3: inputs[10].value,
-        test3: inputs[11].value,
-        exam3: inputs[12].value,
-        note: inputs[13].value
-    };
+   const data = {
+    index: index,
+    last_name: inputs[0].value,
+    first_name: inputs[1].value,
+    class: inputs[2].value,
+    group: inputs[3].value,
+    evaluation1: inputs[4].value,
+    test1: inputs[5].value,
+    exam1: inputs[6].value,
+    evaluation2: inputs[7].value,
+    test2: inputs[8].value,
+    exam2: inputs[9].value,
+    evaluation3: inputs[10].value,
+    test3: inputs[11].value,
+    exam3: inputs[12].value,
+    observation: inputs[13].innerText || inputs[13].value
+}; 
 
     fetch("/edit_student", {
         method: "POST",
