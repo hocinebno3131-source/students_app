@@ -108,7 +108,7 @@ function saveRow(index) {
     evaluation3: inputs[10].value,
     test3: inputs[11].value,
     exam3: inputs[12].value,
-    observation: inputs[13].innerText || inputs[13].value
+   observation: inputs[13].value 
 }; 
 
     fetch("/edit_student", {
