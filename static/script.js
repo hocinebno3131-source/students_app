@@ -21,27 +21,73 @@ function editRow(index) {
     currentEditing = index;
 
     cells.forEach((cell, i) => {
-        if (i === 2) { // class
+        // الأعمدة القابلة للاختيار (class, group)
+        if (i === 2 || i === 3) {
             const value = cell.dataset.value;
-            const options = [{% for c in classes %}'{{ c }}',{% endfor %}];
+            const options = i === 2 ? [{% for c in classes %}'{{ c }}',{% endfor %}] : [{% for g in groups %}'{{ g }}',{% endfor %}];
             let select = `<select>`;
-            options.forEach(opt => select += `<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`);
+            options.forEach(opt => select += `<option value="${opt}" ${opt === value ? 'selected' : ''}>${opt}</option>`);
             select += `</select>`;
             cell.innerHTML = select;
-        } else if (i === 3) { // group
-            const value = cell.dataset.value;
-            const options = [{% for g in groups %}'{{ g }}',{% endfor %}];
-            let select = `<select>`;
-            options.forEach(opt => select += `<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`);
-            select += `</select>`;
-            cell.innerHTML = select;
-        } else if(i >= 4 && i <= 13){  // الأعمدة من 4 إلى 13 تشمل الاختبارات والملاحظة
-    const text=cell.innerText;
-    cell.innerHTML=`<input type="text" value="${text}" style="width:100%">`;
-}
+        } else if (i < cells.length - 1) {
+            const text = cell.innerText;
+            // كل الحقول تتحول الى input بما فيها الملاحظة
+            cell.innerHTML = `<input type="text" value="${text}" style="width:100%">`;
         }
     });
     toggleButtons(row, true);
+}
+
+// --- حفظ الصف ---
+function saveRow(index) {
+    const row = document.getElementById("row-" + index);
+    const inputs = row.querySelectorAll("input, select");
+
+    // تحقق من اللغة العربية
+    for (let i = 0; i < inputs.length; i++) {
+        const input = inputs[i];
+        if (input.tagName === 'INPUT' && input.value && !isArabic(input.value)) {
+            document.getElementById("arabicModal").style.display = "flex";
+            return;
+        }
+    }
+
+    // جمع البيانات من كل الحقول
+    const data = {
+        index: index,
+        last_name: inputs[0].value,
+        first_name: inputs[1].value,
+        class: inputs[2].value,
+        group: inputs[3].value,
+        evaluation1: inputs[4].value,
+        test1: inputs[5].value,
+        exam1: inputs[6].value,
+        evaluation2: inputs[7].value,
+        test2: inputs[8].value,
+        exam2: inputs[9].value,
+        evaluation3: inputs[10].value,
+        test3: inputs[11].value,
+        exam3: inputs[12].value,
+        observation: inputs[13].value   // <-- الآن الملاحظة تحفظ بشكل صحيح
+    };
+
+    fetch("/edit_student", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(data)
+    })
+    .then(res => res.json())
+    .then(resp => {
+        if (resp.status === "success") {
+            const cells = row.querySelectorAll("td");
+            cells.forEach((cell, i) => {
+                cell.innerText = inputs[i].value; // إعادة كل القيم للعرض بعد الحفظ
+            });
+            row.classList.remove("editing-row");
+            toggleButtons(row, false);
+            currentEditing = null;
+        } else alert("حدث خطأ أثناء الحفظ ❌");
+    });
 }
 
 function cancelEdit(index) {
