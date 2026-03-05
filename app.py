@@ -151,19 +151,7 @@ def edit_student():
         first_name = request.form.get("first_name").strip()
         class_name = request.form.get("class").strip()
         group = request.form.get("group").strip()
-        observation = request.form.get("note", "").strip()
-
-        # الحقول الجديدة
-        test1 = request.form.get("test1", "").strip()
-        exam1 = request.form.get("exam1", "").strip()
-        evaluation1 = request.form.get("evaluation1", "").strip()
-        test2 = request.form.get("test2", "").strip()
-        exam2 = request.form.get("exam2", "").strip()
-        evaluation2 = request.form.get("evaluation2", "").strip()
-        test3 = request.form.get("test3", "").strip()
-        exam3 = request.form.get("exam3", "").strip()
-        evaluation3 = request.form.get("evaluation3", "").strip()
-
+        observation = request.form.get("note","").strip()
     except:
         return jsonify({"status":"error", "message":"بيانات غير صحيحة"})
 
@@ -174,20 +162,12 @@ def edit_student():
         students[index]["class"] = class_name
         students[index]["group"] = group
         students[index]["observation"] = observation
-        students[index]["test1"] = test1
-        students[index]["exam1"] = exam1
-        students[index]["evaluation1"] = evaluation1
-        students[index]["test2"] = test2
-        students[index]["exam2"] = exam2
-        students[index]["evaluation2"] = evaluation2
-        students[index]["test3"] = test3
-        students[index]["exam3"] = exam3
-        students[index]["evaluation3"] = evaluation3
 
         write_students(students)
         return jsonify({"status":"success"})
     else:
         return jsonify({"status":"error", "message":"الطالب غير موجود"})
+
 # -------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
