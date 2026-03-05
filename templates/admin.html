@@ -41,18 +41,15 @@ button:hover { background: #0d47a1; }
 table {
     width: 100%;
     border-collapse: collapse;
-    table-layout: fixed; /* لتوحيد الأعمدة عموديًا */
-    margin-bottom: 35px;
-    background: white;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-    border-radius: 8px;
-    overflow: hidden;
+    table-layout: fixed; /* توحيد الأعمدة */
+    word-break: break-word; /* السماح لكسر الكلمات الطويلة */
 }
 
 th, td {
-    padding: 12px 10px;
+    padding: 8px 10px;
     text-align: center;
     word-wrap: break-word; /* التفاف النص داخل الخلية */
+    overflow-wrap: break-word; /* دعم إضافي للكسر */
 }
 
 th { background: #1976d2; color: white; }
