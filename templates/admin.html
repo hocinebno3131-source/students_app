@@ -232,97 +232,89 @@ let currentEditing = null;
 let currentIndex = null;
 
 // --- تعديل ---
+// --- تعديل الصف ---
 function editRow(index) {
     if(currentEditing!==null) return;
-    const row=document.getElementById("row-"+index);
-    const cells=row.querySelectorAll("td");
+    const row = document.getElementById("row-" + index);
+    const cells = row.querySelectorAll("td");
     row.classList.add("editing-row");
-    currentEditing=index;
+    currentEditing = index;
 
-    cells.forEach((cell,i)=>{
-        if(i===2){
-            const value=cell.dataset.value;
-            const options=[{% for c in classes %}'{{ c }}',{% endfor %}];
-            let select=`<select>`;
-            options.forEach(opt=>select+=`<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`);
-            select+=`</select>`;
-            cell.innerHTML=select;
-        }else if(i===3){
-            const value=cell.dataset.value;
-            const options=[{% for g in groups %}'{{ g }}',{% endfor %}];
-            let select=`<select>`;
-            options.forEach(opt=>select+=`<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`);
-            select+=`</select>`;
-            cell.innerHTML=select;
-        }else if(i<cells.length-1){
-            const text=cell.innerText;
-            cell.innerHTML=`<input type="text" value="${text}" style="width:100%">`;
+    cells.forEach((cell, i) => {
+        if(i === 2){ // القسم
+            const value = cell.dataset.value;
+            const options = [{% for c in classes %}'{{ c }}',{% endfor %}];
+            let select = `<select>`;
+            options.forEach(opt => select += `<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`);
+            select += `</select>`;
+            cell.innerHTML = select;
+        } else if(i === 3){ // الفوج
+            const value = cell.dataset.value;
+            const options = [{% for g in groups %}'{{ g }}',{% endfor %}];
+            let select = `<select>`;
+            options.forEach(opt => select += `<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`);
+            select += `</select>`;
+            cell.innerHTML = select;
+        } else if(i < cells.length - 1){ // باقي الحقول بما فيها الملاحظة
+            const text = cell.innerText;
+            cell.innerHTML = `<input type="text" value="${text}" style="width:100%">`;
         }
     });
-    toggleButtons(row,true);
+
+    toggleButtons(row, true);
 }
 
-function cancelEdit(index){
-    const row=document.getElementById("row-"+index);
-    const cells=row.querySelectorAll("td");
-    const inputs=row.querySelectorAll("input, select");
-    inputs.forEach((input,i)=>{
-        if(input.tagName==='SELECT') cells[i].innerText=input.options[input.selectedIndex].value;
-        else cells[i].innerText=input.defaultValue;
-    });
-    row.classList.remove("editing-row");
-    toggleButtons(row,false);
-    currentEditing=null;
-}
-
-function toggleButtons(row,editing){
-    const editBtn=row.querySelector(".edit-btn");
-    const deleteBtn=row.querySelector(".delete-btn");
-    const saveBtn=row.querySelector(".save-btn");
-    const cancelBtn=row.querySelector(".cancel-btn");
-    if(editing){
-        editBtn.style.display="none";
-        deleteBtn.style.display="none";
-        saveBtn.style.display="inline-block";
-        cancelBtn.style.display="inline-block";
-    }else{
-        editBtn.style.display="inline-block";
-        deleteBtn.style.display="inline-block";
-        saveBtn.style.display="none";
-        cancelBtn.style.display="none";
-    }
-}
-
-function isArabic(text){return /^[\u0600-\u06FF0-9\s]+$/.test(text);}
-
+// --- حفظ التعديلات ---
 function saveRow(index){
-    const row=document.getElementById("row-"+index);
-    const inputs=row.querySelectorAll("input, select");
+    const row = document.getElementById("row-" + index);
+    const inputs = row.querySelectorAll("input, select");
+
+    // تحقق من العربية في الحقول النصية
     for(let i=0;i<inputs.length;i++){
-        const input=inputs[i];
+        const input = inputs[i];
         if(input.tagName==='INPUT' && input.value && !isArabic(input.value)){
             document.getElementById("arabicModal").style.display="flex";
             return;
         }
     }
-    const data={index:index,last_name:inputs[0].value,first_name:inputs[1].value,class:inputs[2].value,group:inputs[3].value};
-    ["evaluation1","test1","exam1","evaluation2","test2","exam2","evaluation3","test3","exam3"].forEach((f,i)=>{data[f]=inputs[4+i].value;});
-    fetch("/edit_student",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams(data)})
-    .then(res=>res.json()).then(resp=>{
-        if(resp.status==="success"){
-            const cells=row.querySelectorAll("td");
-            cells[0].innerText=data.last_name;
-            cells[1].innerText=data.first_name;
-            cells[2].innerText=data.class;
-            cells[3].innerText=data.group;
-            for(let i=0;i<9;i++) cells[4+i].innerText=inputs[4+i].value;
+
+    // تجميع البيانات مع الملاحظة
+    const data = {
+        index: index,
+        last_name: inputs[0].value,
+        first_name: inputs[1].value,
+        class: inputs[2].value,
+        group: inputs[3].value,
+        test1: inputs[4].value,
+        exam1: inputs[5].value,
+        evaluation1: inputs[6].value,
+        test2: inputs[7].value,
+        exam2: inputs[8].value,
+        evaluation2: inputs[9].value,
+        test3: inputs[10].value,
+        exam3: inputs[11].value,
+        evaluation3: inputs[12].value,
+        observation: inputs[13].value  // ← الآن يتم حفظ الملاحظة
+    };
+
+    fetch("/edit_student", {
+        method: "POST",
+        headers: {"Content-Type":"application/x-www-form-urlencoded"},
+        body: new URLSearchParams(data)
+    })
+    .then(res => res.json())
+    .then(resp => {
+        if(resp.status === "success"){
+            const cells = row.querySelectorAll("td");
+            for(let i=0;i<cells.length;i++){
+                cells[i].innerText = inputs[i].value;
+            }
             row.classList.remove("editing-row");
-            toggleButtons(row,false);
-            currentEditing=null;
-        }else alert("حدث خطأ أثناء الحفظ ❌");
+            toggleButtons(row, false);
+            currentEditing = null;
+        } else alert("حدث خطأ أثناء الحفظ ❌");
     });
 }
-
 function showDeleteModal(index){currentIndex=index; document.getElementById('deleteModal').style.display='flex';}
 document.getElementById('deleteCancel').addEventListener('click',()=>{document.getElementById('deleteModal').style.display='none';});
 document.getElementById('deleteConfirm').addEventListener('click',()=>{
