@@ -1,193 +1,292 @@
 window.addEventListener("DOMContentLoaded", () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get("duplicate") === "1") {
-        document.getElementById("duplicateModal").style.display = "flex";
-    }
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get("duplicate") === "1") {
+document.getElementById("duplicateModal").style.display = "flex";
+}
 });
 
 function closeDuplicateModal() {
-    document.getElementById("duplicateModal").style.display = "none";
+document.getElementById("duplicateModal").style.display = "none";
 }
 
 let currentEditing = null;
 let currentIndex = null;
 
-// --- تعديل صف ---
+// -------------------------
+// تعديل صف
+// -------------------------
 function editRow(index) {
-    if (currentEditing !== null) return;
-    const row = document.getElementById("row-" + index);
-    const cells = row.querySelectorAll("td");
-    row.classList.add("editing-row");
-    currentEditing = index;
 
-    cells.forEach((cell, i) => {
-        // الأعمدة القابلة للاختيار (class, group)
-        if (i === 2 || i === 3) {
-            const value = cell.dataset.value;
-            const options = i === 2 ? [{% for c in classes %}'{{ c }}',{% endfor %}] : [{% for g in groups %}'{{ g }}',{% endfor %}];
-            let select = `<select>`;
-            options.forEach(opt => select += `<option value="${opt}" ${opt === value ? 'selected' : ''}>${opt}</option>`);
-            select += `</select>`;
-            cell.innerHTML = select;
-        } else if (i < cells.length - 1) {
-            const text = cell.innerText;
-            // كل الحقول تتحول الى input بما فيها الملاحظة
-            cell.innerHTML = `<input type="text" value="${text}" style="width:100%">`;
-        }
-    });
-    toggleButtons(row, true);
-}
+```
+if(currentEditing !== null) return;
 
-// --- حفظ الصف ---
-function saveRow(index) {
-    const row = document.getElementById("row-" + index);
-    const inputs = row.querySelectorAll("input, select");
+const row = document.getElementById("row-" + index);
+const cells = row.querySelectorAll("td");
 
-    // تحقق من اللغة العربية
-    for (let i = 0; i < inputs.length; i++) {
-        const input = inputs[i];
-        if (input.tagName === 'INPUT' && input.value && !isArabic(input.value)) {
-            document.getElementById("arabicModal").style.display = "flex";
-            return;
-        }
+row.classList.add("editing-row");
+currentEditing = index;
+
+cells.forEach((cell, i) => {
+
+    if(i === 2){ // class
+
+        const value = cell.innerText;
+        const options = [{% for c in classes %}'{{ c }}',{% endfor %}];
+
+        let select = `<select>`;
+
+        options.forEach(opt=>{
+            select += `<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`;
+        });
+
+        select += `</select>`;
+
+        cell.innerHTML = select;
     }
 
-    // جمع البيانات من كل الحقول
-    const data = {
-        index: index,
-        last_name: inputs[0].value,
-        first_name: inputs[1].value,
-        class: inputs[2].value,
-        group: inputs[3].value,
-        evaluation1: inputs[4].value,
-        test1: inputs[5].value,
-        exam1: inputs[6].value,
-        evaluation2: inputs[7].value,
-        test2: inputs[8].value,
-        exam2: inputs[9].value,
-        evaluation3: inputs[10].value,
-        test3: inputs[11].value,
-        exam3: inputs[12].value,
-        observation: inputs[13].value   // <-- الآن الملاحظة تحفظ بشكل صحيح
-    };
+    else if(i === 3){ // group
 
-    fetch("/edit_student", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams(data)
+        const value = cell.innerText;
+        const options = [{% for g in groups %}'{{ g }}',{% endfor %}];
+
+        let select = `<select>`;
+
+        options.forEach(opt=>{
+            select += `<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`;
+        });
+
+        select += `</select>`;
+
+        cell.innerHTML = select;
+    }
+
+    else if(i < cells.length-1){
+
+        const text = cell.innerText;
+
+        cell.innerHTML = `<input type="text" value="${text}" style="width:100%">`;
+    }
+
+});
+
+toggleButtons(row,true);
+```
+
+}
+
+// -------------------------
+// الغاء التعديل
+// -------------------------
+function cancelEdit(index){
+
+```
+const row = document.getElementById("row-"+index);
+const cells = row.querySelectorAll("td");
+const inputs = row.querySelectorAll("input,select");
+
+inputs.forEach((input,i)=>{
+
+    if(input.tagName === "SELECT"){
+        cells[i].innerText = input.value;
+    }
+    else{
+        cells[i].innerText = input.defaultValue;
+    }
+
+});
+
+row.classList.remove("editing-row");
+
+toggleButtons(row,false);
+
+currentEditing = null;
+```
+
+}
+
+// -------------------------
+// تبديل الازرار
+// -------------------------
+function toggleButtons(row,editing){
+
+```
+const editBtn = row.querySelector(".edit-btn");
+const deleteBtn = row.querySelector(".delete-btn");
+const saveBtn = row.querySelector(".save-btn");
+const cancelBtn = row.querySelector(".cancel-btn");
+
+if(editing){
+    editBtn.style.display="none";
+    deleteBtn.style.display="none";
+    saveBtn.style.display="inline-block";
+    cancelBtn.style.display="inline-block";
+}
+else{
+    editBtn.style.display="inline-block";
+    deleteBtn.style.display="inline-block";
+    saveBtn.style.display="none";
+    cancelBtn.style.display="none";
+}
+```
+
+}
+
+// -------------------------
+// تحقق العربية
+// -------------------------
+function isArabic(text){
+return /^[\u0600-\u06FF0-9\s]+$/.test(text);
+}
+
+// -------------------------
+// حفظ التعديل
+// -------------------------
+function saveRow(index){
+
+```
+const row = document.getElementById("row-"+index);
+const inputs = row.querySelectorAll("input,select");
+
+for(let i=0;i<inputs.length;i++){
+
+    const input = inputs[i];
+
+    if(input.tagName==="INPUT" && input.value && !isArabic(input.value)){
+        document.getElementById("arabicModal").style.display="flex";
+        return;
+    }
+}
+
+const data={
+    index:index,
+    last_name:inputs[0].value,
+    first_name:inputs[1].value,
+    class:inputs[2].value,
+    group:inputs[3].value,
+
+    test1:inputs[4].value,
+    exam1:inputs[5].value,
+    evaluation1:inputs[6].value,
+
+    test2:inputs[7].value,
+    exam2:inputs[8].value,
+    evaluation2:inputs[9].value,
+
+    test3:inputs[10].value,
+    exam3:inputs[11].value,
+    evaluation3:inputs[12].value,
+
+    note:inputs[13].value
+};
+
+fetch("/edit_student",{
+    method:"POST",
+    headers:{"Content-Type":"application/x-www-form-urlencoded"},
+    body:new URLSearchParams(data)
+})
+.then(res=>res.json())
+.then(resp=>{
+
+    if(resp.status==="success"){
+
+        const cells=row.querySelectorAll("td");
+
+        cells[0].innerText=data.last_name;
+        cells[1].innerText=data.first_name;
+        cells[2].innerText=data.class;
+        cells[3].innerText=data.group;
+
+        for(let i=4;i<=12;i++){
+            cells[i].innerText=inputs[i].value;
+        }
+
+        cells[13].innerText=data.note;
+
+        row.classList.remove("editing-row");
+
+        toggleButtons(row,false);
+
+        currentEditing=null;
+    }
+    else{
+        alert("حدث خطأ أثناء الحفظ ❌");
+    }
+
+});
+```
+
+}
+
+// -------------------------
+// حذف الطالب
+// -------------------------
+function showDeleteModal(index){
+
+```
+currentIndex=index;
+
+document.getElementById("deleteModal").style.display="flex";
+```
+
+}
+
+document.getElementById("deleteCancel").addEventListener("click",()=>{
+
+```
+document.getElementById("deleteModal").style.display="none";
+```
+
+});
+
+document.getElementById("deleteConfirm").addEventListener("click",()=>{
+
+```
+if(currentIndex!==null){
+
+    fetch("/delete_student",{
+        method:"POST",
+        headers:{"Content-Type":"application/x-www-form-urlencoded"},
+        body:"index="+currentIndex
     })
-    .then(res => res.json())
-    .then(resp => {
-        if (resp.status === "success") {
-            const cells = row.querySelectorAll("td");
-            cells.forEach((cell, i) => {
-                cell.innerText = inputs[i].value; // إعادة كل القيم للعرض بعد الحفظ
-            });
-            row.classList.remove("editing-row");
-            toggleButtons(row, false);
-            currentEditing = null;
-        } else alert("حدث خطأ أثناء الحفظ ❌");
+    .then(res=>res.json())
+    .then(data=>{
+
+        if(data.status==="success"){
+
+            const row=document.getElementById("row-"+currentIndex);
+
+            if(row) row.remove();
+        }
+
+        else{
+            alert("حدث خطأ أثناء الحذف ❌");
+        }
+
+        document.getElementById("deleteModal").style.display="none";
+
+        currentIndex=null;
+
     });
 }
+```
 
-function cancelEdit(index) {
-    const row = document.getElementById("row-" + index);
-    const cells = row.querySelectorAll("td");
-    const inputs = row.querySelectorAll("input, select");
-    inputs.forEach((input, i) => {
-        if (input.tagName === 'SELECT') cells[i].innerText = input.options[input.selectedIndex].value;
-        else cells[i].innerText = input.defaultValue;
-    });
-    row.classList.remove("editing-row");
-    toggleButtons(row, false);
-    currentEditing = null;
-}
-
-function toggleButtons(row, editing) {
-    const editBtn = row.querySelector(".edit-btn");
-    const deleteBtn = row.querySelector(".delete-btn");
-    const saveBtn = row.querySelector(".save-btn");
-    const cancelBtn = row.querySelector(".cancel-btn");
-    if (editing) {
-        editBtn.style.display = "none";
-        deleteBtn.style.display = "none";
-        saveBtn.style.display = "inline-block";
-        cancelBtn.style.display = "inline-block";
-    } else {
-        editBtn.style.display = "inline-block";
-        deleteBtn.style.display = "inline-block";
-        saveBtn.style.display = "none";
-        cancelBtn.style.display = "none";
-    }
-}
-
-function isArabic(text) {
-    return /^[\u0600-\u06FF0-9\s]+$/.test(text);
-}
-
-
-// --- حذف الطالب ---
-function showDeleteModal(index) {
-    currentIndex = index;
-    document.getElementById('deleteModal').style.display = 'flex';
-}
-document.getElementById('deleteCancel').addEventListener('click', () => {
-    document.getElementById('deleteModal').style.display = 'none';
-});
-document.getElementById('deleteConfirm').addEventListener('click', () => {
-    if (currentIndex !== null) {
-        fetch("/delete_student", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: "index=" + currentIndex
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === "success") {
-                const row = document.getElementById("row-" + currentIndex);
-                if (row) row.remove();
-            } else alert("حدث خطأ أثناء الحذف ❌");
-            document.getElementById('deleteModal').style.display = 'none';
-            currentIndex = null;
-        });
-    }
 });
 
-// --- فلترة ---
-function applyFilter() {
-    const classVal = document.getElementById("classFilter").value;
-    const groupVal = document.getElementById("groupFilter").value;
-    const semesterVal = document.getElementById("semesterFilter").value;
+// -------------------------
+// الطباعة
+// -------------------------
+function printTables(){
 
-    document.querySelectorAll(".table-wrapper").forEach(t => {
-        const show = ((classVal === "" || t.dataset.class === classVal) &&
-                      (groupVal === "" || t.dataset.group === groupVal));
-        t.style.display = show ? "block" : "none";
+```
+window.print();
+```
 
-        t.querySelectorAll("tr").forEach(tr => {
-            const ths = tr.querySelectorAll("th, td");
-            if (semesterVal === "1") {
-                ths.forEach(el => { if (el.classList.contains("sem1")) el.style.display="table-cell"; else if(el.classList.contains("sem2")||el.classList.contains("sem3")) el.style.display="none"; else el.style.display="table-cell"; });
-            } else if (semesterVal === "2") {
-                ths.forEach(el => { if (el.classList.contains("sem2")) el.style.display="table-cell"; else if(el.classList.contains("sem1")||el.classList.contains("sem3")) el.style.display="none"; else el.style.display="table-cell"; });
-            } else if (semesterVal === "3") {
-                ths.forEach(el => { if (el.classList.contains("sem3")) el.style.display="table-cell"; else if(el.classList.contains("sem1")||el.classList.contains("sem2")) el.style.display="none"; else el.style.display="table-cell"; });
-            } else if (semesterVal === "all") {
-                ths.forEach(el => { el.style.display="table-cell"; });
-            } else {
-                ths.forEach(el => { if(el.classList.contains("sem1")||el.classList.contains("sem2")||el.classList.contains("sem3")) el.style.display="none"; else el.style.display="table-cell"; });
-            }
-        });
-    });
 }
 
-function showAll() {
-    document.querySelectorAll(".table-wrapper").forEach(t => t.style.display = "block");
-    document.getElementById("classFilter").value = "";
-    document.getElementById("groupFilter").value = "";
-    document.getElementById("semesterFilter").value = "";
-    applyFilter();
-}
+function closeArabicModal(){
 
-function printTables() { window.print(); }
-function closeArabicModal() { document.getElementById("arabicModal").style.display = "none"; }
+```
+document.getElementById("arabicModal").style.display="none";
+```
+
+}
