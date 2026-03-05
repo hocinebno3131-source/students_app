@@ -38,20 +38,21 @@ button:hover { background: #0d47a1; }
 .save-btn { background: #1976d2; padding: 6px 10px; font-size: 14px; display:none; }
 .cancel-btn { background: #757575; padding: 6px 10px; font-size: 14px; display:none; }
 
-.table-wrapper {
-    overflow-x: auto; /* يسمح بالتمرير الأفقي إذا كان الجدول أكبر من النافذة */
-}
-
 table {
     width: 100%;
     border-collapse: collapse;
-    table-layout: auto; /* الأعمدة تتكيف مع المحتوى */
+    table-layout: fixed; /* لتوحيد الأعمدة عموديًا */
+    margin-bottom: 35px;
+    background: white;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 th, td {
-    padding: 8px;
+    padding: 12px 10px;
     text-align: center;
-    white-space: nowrap; /* يمنع التفاف الحروف داخل الخلية */
+    word-wrap: break-word; /* التفاف النص داخل الخلية */
 }
 
 th { background: #1976d2; color: white; }
@@ -73,10 +74,8 @@ th:nth-child(10), td:nth-child(10),
 th:nth-child(11), td:nth-child(11),
 th:nth-child(12), td:nth-child(12),
 th:nth-child(13), td:nth-child(13) { width: 6%; } /* درجات */
-th:nth-child(14), td:nth-child(14) { 
-    width: 18%;      /* زيادة العرض لتناسب كلمة الإجراءات */
-    white-space: nowrap; /* منع التفاف الحروف */
-}
+th:nth-child(14), td:nth-child(14) { width: 12%; } /* إجراءات */
+
 /* صف في وضع التعديل */
 .editing-row { background-color: #fff9c4 !important; transition: 0.3s; }
 
@@ -161,7 +160,6 @@ th:nth-child(14), td:nth-child(14) {
 <th class="sem3">تقويم3</th>
 <th class="sem3">فرض3</th>
 <th class="sem3">اختبار3</th>
-<th>ملاحظة</th>
 <th>إجراءات</th>
 </tr>
 </thead>
@@ -182,7 +180,6 @@ th:nth-child(14), td:nth-child(14) {
 <td class="sem3">{{ s['evaluation3'] }}</td>
 <td class="sem3">{{ s['test3'] }}</td>
 <td class="sem3">{{ s['exam3'] }}</td>
-<td>{{ s['observation'] }}</td>
 <td>
 <button class="edit-btn" onclick="editRow({{ s['_index'] }})">✏️ تعديل</button>
 <button class="delete-btn" onclick="showDeleteModal({{ s['_index'] }})">🗑 حذف</button>
@@ -224,38 +221,35 @@ let currentIndex = null;
 
 // --- تعديل ---
 function editRow(index) {
-    if(currentEditing !== null) return;
-    const row = document.getElementById("row-" + index);
-    const cells = row.querySelectorAll("td");
+    if(currentEditing!==null) return;
+    const row=document.getElementById("row-"+index);
+    const cells=row.querySelectorAll("td");
     row.classList.add("editing-row");
-    currentEditing = index;
+    currentEditing=index;
 
-    cells.forEach((cell, i) => {
-        if (i === 2) { // القسم
-            const value = cell.dataset.value;
-            const options = [{% for c in classes %}'{{ c }}',{% endfor %}];
-            let select = `<select>`;
-            options.forEach(opt => select += `<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`);
-            select += `</select>`;
-            cell.innerHTML = select;
-        } else if (i === 3) { // الفوج
-            const value = cell.dataset.value;
-            const options = [{% for g in groups %}'{{ g }}',{% endfor %}];
-            let select = `<select>`;
-            options.forEach(opt => select += `<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`);
-            select += `</select>`;
-            cell.innerHTML = select;
-        } else if(i === 13) { // الملاحظة
-            const text = cell.innerText;
-            cell.innerHTML = `<textarea style="width:100%; min-height:50px;">${text}</textarea>`;
-        } else if(i < cells.length - 1) { // باقي الحقول
-            const text = cell.innerText;
-            cell.innerHTML = `<input type="text" value="${text}" style="width:100%">`;
+    cells.forEach((cell,i)=>{
+        if(i===2){
+            const value=cell.dataset.value;
+            const options=[{% for c in classes %}'{{ c }}',{% endfor %}];
+            let select=`<select>`;
+            options.forEach(opt=>select+=`<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`);
+            select+=`</select>`;
+            cell.innerHTML=select;
+        }else if(i===3){
+            const value=cell.dataset.value;
+            const options=[{% for g in groups %}'{{ g }}',{% endfor %}];
+            let select=`<select>`;
+            options.forEach(opt=>select+=`<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`);
+            select+=`</select>`;
+            cell.innerHTML=select;
+        }else if(i<cells.length-1){
+            const text=cell.innerText;
+            cell.innerHTML=`<input type="text" value="${text}" style="width:100%">`;
         }
     });
-
-    toggleButtons(row, true);
+    toggleButtons(row,true);
 }
+
 function cancelEdit(index){
     const row=document.getElementById("row-"+index);
     const cells=row.querySelectorAll("td");
@@ -290,59 +284,30 @@ function toggleButtons(row,editing){
 function isArabic(text){return /^[\u0600-\u06FF0-9\s]+$/.test(text);}
 
 function saveRow(index){
-    const row = document.getElementById("row-" + index);
-    const inputs = row.querySelectorAll("input, select");
-
-    // التحقق من اللغة العربية في كل الحقول النصية
-    for(let i=0; i<inputs.length; i++){
-        const input = inputs[i];
-        if(input.tagName === 'INPUT' && input.value && !isArabic(input.value)){
-            document.getElementById("arabicModal").style.display = "flex";
+    const row=document.getElementById("row-"+index);
+    const inputs=row.querySelectorAll("input, select");
+    for(let i=0;i<inputs.length;i++){
+        const input=inputs[i];
+        if(input.tagName==='INPUT' && input.value && !isArabic(input.value)){
+            document.getElementById("arabicModal").style.display="flex";
             return;
         }
     }
-
-    // تجهيز البيانات للإرسال
-    const data = {
-        index: index,
-        last_name: inputs[0].value,
-        first_name: inputs[1].value,
-        class: inputs[2].value,
-        group: inputs[3].value,
-        evaluation1: inputs[4].value,
-        test1: inputs[5].value,
-        exam1: inputs[6].value,
-        evaluation2: inputs[7].value,
-        test2: inputs[8].value,
-        exam2: inputs[9].value,
-        evaluation3: inputs[10].value,
-        test3: inputs[11].value,
-        exam3: inputs[12].value,
-        observation: inputs[13].value // الملاحظة مستقلة الآن
-    };
-
-    // إرسال البيانات للباك إند
-    fetch("/edit_student", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams(data)
-    })
-    .then(res => res.json())
-    .then(resp => {
-        if(resp.status === "success"){
-            const cells = row.querySelectorAll("td");
-            cells[0].innerText = data.last_name;
-            cells[1].innerText = data.first_name;
-            cells[2].innerText = data.class;
-            cells[3].innerText = data.group;
-            for(let i=0; i<9; i++) cells[4+i].innerText = inputs[4+i].value; // الأعمدة 4-12
-            cells[13].innerText = data.observation; // الملاحظة
+    const data={index:index,last_name:inputs[0].value,first_name:inputs[1].value,class:inputs[2].value,group:inputs[3].value};
+    ["evaluation1","test1","exam1","evaluation2","test2","exam2","evaluation3","test3","exam3"].forEach((f,i)=>{data[f]=inputs[4+i].value;});
+    fetch("/edit_student",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams(data)})
+    .then(res=>res.json()).then(resp=>{
+        if(resp.status==="success"){
+            const cells=row.querySelectorAll("td");
+            cells[0].innerText=data.last_name;
+            cells[1].innerText=data.first_name;
+            cells[2].innerText=data.class;
+            cells[3].innerText=data.group;
+            for(let i=0;i<9;i++) cells[4+i].innerText=inputs[4+i].value;
             row.classList.remove("editing-row");
             toggleButtons(row,false);
-            currentEditing = null;
-        } else {
-            alert("حدث خطأ أثناء الحفظ ❌");
-        }
+            currentEditing=null;
+        }else alert("حدث خطأ أثناء الحفظ ❌");
     });
 }
 
