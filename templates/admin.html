@@ -364,6 +364,24 @@ function showAll(){
     document.getElementById("semesterFilter").value="";
     applyFilter();
 }
+function toggleButtons(row, editing){
+    const saveBtn = row.querySelector(".save-btn");
+    const cancelBtn = row.querySelector(".cancel-btn");
+    const editBtn = row.querySelector(".edit-btn");
+    const deleteBtn = row.querySelector(".delete-btn");
+
+    if(editing){
+        saveBtn.style.display = "inline-block";
+        cancelBtn.style.display = "inline-block";
+        editBtn.style.display = "none";
+        deleteBtn.style.display = "none";
+    } else {
+        saveBtn.style.display = "none";
+        cancelBtn.style.display = "none";
+        editBtn.style.display = "inline-block";
+        deleteBtn.style.display = "inline-block";
+    }
+}    
 function printTables(){window.print();}
 function closeArabicModal(){document.getElementById("arabicModal").style.display="none";}
 </script>
