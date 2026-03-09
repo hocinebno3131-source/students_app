@@ -268,7 +268,7 @@ function editRow(index) {
 function saveRow(index){
     const row = document.getElementById("row-" + index);
     const inputs = row.querySelectorAll("input, select");
-
+<button class="save-btn" onclick="saveRow({{ s['_index'] }})">💾 حفظ</button>
     // تحقق من العربية في الحقول النصية
     for(let i=0;i<inputs.length;i++){
         const input = inputs[i];
@@ -277,7 +277,24 @@ function saveRow(index){
             return;
         }
     }
+ function cancelEdit(index){
+    const row = document.getElementById("row-" + index);
+    const cells = row.querySelectorAll("td");
+    // إعادة النص الأصلي لكل خلية
+    cells[0].innerText = "{{ s['last_name'] }}"; // لاحقاً سنعدل لتكون ديناميكية
+    cells[1].innerText = "{{ s['first_name'] }}";
+    cells[2].innerText = cells[2].dataset.value; // القسم
+    cells[3].innerText = cells[3].dataset.value; // الفوج
+    // بقية الحقول: اختبار، فرض، تقويم، ملاحظة
+    for(let i=4; i<=13; i++){
+        const input = row.querySelectorAll("input, select")[i-4];
+        if(input) cells[i].innerText = input.defaultValue || "";
+    }
 
+    row.classList.remove("editing-row");
+    toggleButtons(row, false);
+    currentEditing = null;
+}
     // تجميع البيانات مع الملاحظة
     const data = {
         index: index,
