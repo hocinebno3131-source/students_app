@@ -160,9 +160,11 @@ th:nth-child(11), td:nth-child(11),
 th:nth-child(12), td:nth-child(12),
 th:nth-child(13), td:nth-child(13) { width: 6%; } /* درجات */
 th:nth-child(14), td:nth-child(14) { 
-    width: 14%;       /* زيادة العرض للعمود الأخير */
+    width: 18%;       /* زيادة العرض للعمود الأخير */
     white-space: nowrap; /* منع التفاف النص */
+    overflow: visible;   /* السماح للنص بالظهور الكامل */
     text-align: center;  /* محاذاة مركزية */
+    word-break: normal;  /* منع كسر الكلمة */
 }
 
 .table-title {
