@@ -476,7 +476,43 @@ function printTables(){
 function closeArabicModal(){
     document.getElementById("arabicModal").style.display="none";
 }
+function applyFilter(){
 
+    const classValue = document.getElementById("classFilter").value;
+    const groupValue = document.getElementById("groupFilter").value;
+
+    const tables = document.querySelectorAll(".table-wrapper");
+
+    tables.forEach(table => {
+
+        const tableClass = table.dataset.class;
+        const tableGroup = table.dataset.group;
+
+        let show = true;
+
+        if(classValue && tableClass !== classValue){
+            show = false;
+        }
+
+        if(groupValue && tableGroup !== groupValue){
+            show = false;
+        }
+
+        table.style.display = show ? "block" : "none";
+
+    });
+
+}
+
+function showAll(){
+
+    const tables = document.querySelectorAll(".table-wrapper");
+
+    tables.forEach(table=>{
+        table.style.display = "block";
+    });
+
+}
 </script>
 
 </body>
