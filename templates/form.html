@@ -5,31 +5,53 @@
 <title>نموذج تسجيل الطلبة</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 <style>
+/* =========================== */
+/* الخلفية للجسم */
 body {
     background: url('/static/images/background.jpg') no-repeat center center fixed;
-    background-size: contain; /* بدل cover */
-    background-color: #f0f0f0; /* لون احتياطي للمساحات الفارغة */
+    background-size: cover; /* بدل contain لتظهر الصورة كاملة وتملأ الشاشة */
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* يملأ طول الشاشة */
+    margin: 0;
+    padding: 20px;
 }
+
+/* =========================== */
+/* صندوق النموذج */
 .container { 
     max-width: 500px; 
     width: 100%;
-    background: #1976d2; 
-    padding: 30px; 
+    min-height: 90vh; /* زيادة طول الصندوق */
+    background: rgba(25,118,210,0.9); /* خلفية شفافة قليلاً لتظهر الصورة */
+    padding: 40px; /* تكبير الحشو */
     border-radius: 12px; 
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2); 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3); 
     color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
+
+/* =========================== */
+/* عنوان النموذج */
 h2 { 
     text-align: center; 
-    margin-bottom: 25px; 
+    margin-bottom: 30px; 
+    font-size: 28px; /* تكبير العنوان */
 }
+
+/* =========================== */
+/* الحقول */
 input, select { 
     width: 100%; 
-    padding: 10px; 
-    margin: 8px 0; 
-    border-radius: 6px; 
+    padding: 14px; /* تكبير الحقول */
+    margin: 10px 0; 
+    border-radius: 8px; 
     border: 1px solid #90caf9; 
-    font-size: 16px; 
+    font-size: 18px; /* تكبير الكتابة */
     background: #f9f9f9; 
     color: #000;
 }
@@ -37,17 +59,20 @@ input:focus, select:focus {
     border-color: #42a5f5;
     outline: none;
 }
+
+/* =========================== */
+/* الأزرار */
 .buttons { 
     display: flex; 
     gap: 15px; 
-    margin-top: 15px; 
+    margin-top: 20px; 
 }
 .buttons button { 
     flex: 1; 
-    padding: 12px; 
+    padding: 14px; /* تكبير الأزرار */
     border: none; 
-    border-radius: 6px; 
-    font-size: 18px; 
+    border-radius: 8px; 
+    font-size: 18px; /* تكبير الكتابة */
     cursor: pointer; 
     font-weight: bold; 
     transition: 0.3s;
