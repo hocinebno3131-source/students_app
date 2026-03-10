@@ -231,176 +231,252 @@ th:nth-child(14), td:nth-child(14) { width: 12%; } /* إجراءات */
 let currentEditing = null;
 let currentIndex = null;
 
-// --- تعديل ---
+// التحقق من العربية
+function isArabic(text){
+    return /^[\u0600-\u06FF\s0-9]+$/.test(text);
+}
+
 // --- تعديل الصف ---
 function editRow(index) {
-    if(currentEditing!==null) return;
+
+    if(currentEditing !== null) return;
+
     const row = document.getElementById("row-" + index);
     const cells = row.querySelectorAll("td");
+
     row.classList.add("editing-row");
     currentEditing = index;
 
     cells.forEach((cell, i) => {
+
         if(i === 2){ // القسم
             const value = cell.dataset.value;
             const options = [{% for c in classes %}'{{ c }}',{% endfor %}];
+
             let select = `<select>`;
-            options.forEach(opt => select += `<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`);
+            options.forEach(opt=>{
+                select += `<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`;
+            });
             select += `</select>`;
+
             cell.innerHTML = select;
-        } else if(i === 3){ // الفوج
+
+        }
+
+        else if(i === 3){ // الفوج
+
             const value = cell.dataset.value;
             const options = [{% for g in groups %}'{{ g }}',{% endfor %}];
+
             let select = `<select>`;
-            options.forEach(opt => select += `<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`);
+            options.forEach(opt=>{
+                select += `<option value="${opt}" ${opt===value?'selected':''}>${opt}</option>`;
+            });
             select += `</select>`;
+
             cell.innerHTML = select;
-        } else if(i < cells.length - 1){ // باقي الحقول بما فيها الملاحظة
-            const text = cell.innerText;
-            cell.innerHTML = `<input type="text" value="${text}" style="width:100%">`;
+
         }
+
+        else if(i < cells.length - 1){ // باقي الحقول
+
+            const text = cell.innerText;
+
+            cell.innerHTML =
+            `<input type="text" value="${text}" style="width:100%">`;
+
+        }
+
     });
 
     toggleButtons(row, true);
+
 }
 
 // --- حفظ التعديلات ---
 function saveRow(index){
+
     const row = document.getElementById("row-" + index);
     const inputs = row.querySelectorAll("input, select");
-<button class="save-btn" onclick="saveRow({{ s['_index'] }})">💾 حفظ</button>
-    // تحقق من العربية في الحقول النصية
+
+    // تحقق من العربية
     for(let i=0;i<inputs.length;i++){
+
         const input = inputs[i];
-        if(input.tagName==='INPUT' && input.value && !isArabic(input.value)){
+
+        if(input.tagName === 'INPUT' && input.value && !isArabic(input.value)){
             document.getElementById("arabicModal").style.display="flex";
             return;
         }
-    }
- function cancelEdit(index){
-    const row = document.getElementById("row-" + index);
-    const cells = row.querySelectorAll("td");
-    // إعادة النص الأصلي لكل خلية
-    cells[0].innerText = "{{ s['last_name'] }}"; // لاحقاً سنعدل لتكون ديناميكية
-    cells[1].innerText = "{{ s['first_name'] }}";
-    cells[2].innerText = cells[2].dataset.value; // القسم
-    cells[3].innerText = cells[3].dataset.value; // الفوج
-    // بقية الحقول: اختبار، فرض، تقويم، ملاحظة
-    for(let i=4; i<=13; i++){
-        const input = row.querySelectorAll("input, select")[i-4];
-        if(input) cells[i].innerText = input.defaultValue || "";
+
     }
 
-    row.classList.remove("editing-row");
-    toggleButtons(row, false);
-    currentEditing = null;
-}
-    // تجميع البيانات مع الملاحظة
     const data = {
+
         index: index,
         last_name: inputs[0].value,
         first_name: inputs[1].value,
         class: inputs[2].value,
         group: inputs[3].value,
-        test1: inputs[4].value,
-        exam1: inputs[5].value,
-        evaluation1: inputs[6].value,
-        test2: inputs[7].value,
-        exam2: inputs[8].value,
-        evaluation2: inputs[9].value,
-        test3: inputs[10].value,
-        exam3: inputs[11].value,
-        evaluation3: inputs[12].value,
-        observation: inputs[13].value  // ← الآن يتم حفظ الملاحظة
+
+        evaluation1: inputs[4].value,
+        test1: inputs[5].value,
+        exam1: inputs[6].value,
+
+        evaluation2: inputs[7].value,
+        test2: inputs[8].value,
+        exam2: inputs[9].value,
+
+        evaluation3: inputs[10].value,
+        test3: inputs[11].value,
+        exam3: inputs[12].value,
+
+        observation: inputs[13].value
+
     };
 
-    fetch("/edit_student", {
-        method: "POST",
-        headers: {"Content-Type":"application/x-www-form-urlencoded"},
-        body: new URLSearchParams(data)
+    fetch("/edit_student",{
+
+        method:"POST",
+        headers:{"Content-Type":"application/x-www-form-urlencoded"},
+        body:new URLSearchParams(data)
+
     })
-    .then(res => res.json())
-    .then(resp => {
+
+    .then(res=>res.json())
+
+    .then(resp=>{
+
         if(resp.status === "success"){
+
             const cells = row.querySelectorAll("td");
-            for(let i=0;i<cells.length;i++){
-                cells[i].innerText = inputs[i].value;
-            }
+
+            inputs.forEach((input,i)=>{
+                if(cells[i]){
+                    cells[i].innerText = input.value;
+                }
+            });
+
             row.classList.remove("editing-row");
-            toggleButtons(row, false);
+
+            toggleButtons(row,false);
+
             currentEditing = null;
-        } else alert("حدث خطأ أثناء الحفظ ❌");
+
+        }
+
+        else{
+
+            alert("حدث خطأ أثناء الحفظ ❌");
+
+        }
+
     });
+
 }
-function showDeleteModal(index){currentIndex=index; document.getElementById('deleteModal').style.display='flex';}
-document.getElementById('deleteCancel').addEventListener('click',()=>{document.getElementById('deleteModal').style.display='none';});
-document.getElementById('deleteConfirm').addEventListener('click',()=>{
-    if(currentIndex!==null){
-        fetch("/delete_student",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:"index="+currentIndex})
-        .then(res=>res.json()).then(data=>{
-            if(data.status==="success"){const row=document.getElementById("row-"+currentIndex); if(row) row.remove();}
-            else alert("حدث خطأ أثناء الحذف ❌");
-            document.getElementById('deleteModal').style.display='none';
-            currentIndex=null;
-        });
-    }
+
+// --- إلغاء التعديل ---
+function cancelEdit(index){
+
+    location.reload();
+
+}
+
+// --- حذف الطالب ---
+function showDeleteModal(index){
+
+    currentIndex = index;
+
+    document.getElementById('deleteModal').style.display='flex';
+
+}
+
+document.getElementById('deleteCancel').addEventListener('click',()=>{
+
+    document.getElementById('deleteModal').style.display='none';
+
 });
 
-// --- الفلترة حسب الفصل ---
-function applyFilter(){
-    const classVal=document.getElementById("classFilter").value;
-    const groupVal=document.getElementById("groupFilter").value;
-    const semesterVal=document.getElementById("semesterFilter").value;
+document.getElementById('deleteConfirm').addEventListener('click',()=>{
 
-    document.querySelectorAll(".table-wrapper").forEach(t=>{
-        const show=((classVal==="" || t.dataset.class===classVal) &&
-                    (groupVal==="" || t.dataset.group===groupVal));
-        t.style.display=show?"block":"none";
+    if(currentIndex!==null){
 
-        t.querySelectorAll("tr").forEach(tr=>{
-            const ths=tr.querySelectorAll("th, td");
-            if(semesterVal==="1"){
-                ths.forEach(el=>{if(el.classList.contains("sem1")) el.style.display="table-cell"; else if(el.classList.contains("sem2")||el.classList.contains("sem3")) el.style.display="none"; else el.style.display="table-cell";});
-            }else if(semesterVal==="2"){
-                ths.forEach(el=>{if(el.classList.contains("sem2")) el.style.display="table-cell"; else if(el.classList.contains("sem1")||el.classList.contains("sem3")) el.style.display="none"; else el.style.display="table-cell";});
-            }else if(semesterVal==="3"){
-                ths.forEach(el=>{if(el.classList.contains("sem3")) el.style.display="table-cell"; else if(el.classList.contains("sem1")||el.classList.contains("sem2")) el.style.display="none"; else el.style.display="table-cell";});
-            }else if(semesterVal==="all"){
-                ths.forEach(el=>{el.style.display="table-cell";});
-            }else{
-                ths.forEach(el=>{if(el.classList.contains("sem1")||el.classList.contains("sem2")||el.classList.contains("sem3")) el.style.display="none"; else el.style.display="table-cell";});
+        fetch("/delete_student",{
+
+            method:"POST",
+
+            headers:{"Content-Type":"application/x-www-form-urlencoded"},
+
+            body:"index="+currentIndex
+
+        })
+
+        .then(res=>res.json())
+
+        .then(data=>{
+
+            if(data.status==="success"){
+
+                const row=document.getElementById("row-"+currentIndex);
+
+                if(row) row.remove();
+
             }
-        });
-    });
-}
 
-function showAll(){
-    document.querySelectorAll(".table-wrapper").forEach(t=>t.style.display="block");
-    document.getElementById("classFilter").value="";
-    document.getElementById("groupFilter").value="";
-    document.getElementById("semesterFilter").value="";
-    applyFilter();
-}
+            else{
+
+                alert("حدث خطأ أثناء الحذف ❌");
+
+            }
+
+            document.getElementById('deleteModal').style.display='none';
+
+            currentIndex=null;
+
+        });
+
+    }
+
+});
+
+// إظهار أو إخفاء الأزرار
 function toggleButtons(row, editing){
+
     const saveBtn = row.querySelector(".save-btn");
     const cancelBtn = row.querySelector(".cancel-btn");
     const editBtn = row.querySelector(".edit-btn");
     const deleteBtn = row.querySelector(".delete-btn");
 
     if(editing){
-        saveBtn.style.display = "inline-block";
-        cancelBtn.style.display = "inline-block";
-        editBtn.style.display = "none";
-        deleteBtn.style.display = "none";
-    } else {
-        saveBtn.style.display = "none";
-        cancelBtn.style.display = "none";
-        editBtn.style.display = "inline-block";
-        deleteBtn.style.display = "inline-block";
+
+        saveBtn.style.display="inline-block";
+        cancelBtn.style.display="inline-block";
+
+        editBtn.style.display="none";
+        deleteBtn.style.display="none";
+
     }
-}    
-function printTables(){window.print();}
-function closeArabicModal(){document.getElementById("arabicModal").style.display="none";}
+
+    else{
+
+        saveBtn.style.display="none";
+        cancelBtn.style.display="none";
+
+        editBtn.style.display="inline-block";
+        deleteBtn.style.display="inline-block";
+
+    }
+
+}
+
+function printTables(){
+    window.print();
+}
+
+function closeArabicModal(){
+    document.getElementById("arabicModal").style.display="none";
+}
+
 </script>
 
 </body>
