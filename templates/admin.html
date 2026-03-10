@@ -122,7 +122,12 @@ table {
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
-th:nth-child(15), td:nth-child(15) { 
+/* عمود الإجراءات فقط */
+th:last-child, td:last-child {
+    width: auto;
+    white-space: nowrap; /* منع تقسيم الكلمة */
+}
+    th:nth-child(15), td:nth-child(15) { 
     width: auto;       /* السماح للعمود الأخير بالامتداد الطبيعي */
     white-space: nowrap; 
     word-break: normal;
