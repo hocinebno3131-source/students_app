@@ -477,33 +477,46 @@ function closeArabicModal(){
     document.getElementById("arabicModal").style.display="none";
 }
 function applyFilter(){
-
     const classValue = document.getElementById("classFilter").value;
     const groupValue = document.getElementById("groupFilter").value;
+    const semesterValue = document.getElementById("semesterFilter").value;
 
     const tables = document.querySelectorAll(".table-wrapper");
 
     tables.forEach(table => {
-
         const tableClass = table.dataset.class;
         const tableGroup = table.dataset.group;
 
-        let show = true;
+        let showTable = true;
 
-        if(classValue && tableClass !== classValue){
-            show = false;
+        if(classValue && tableClass !== classValue) showTable = false;
+        if(groupValue && tableGroup !== groupValue) showTable = false;
+
+        table.style.display = showTable ? "block" : "none";
+
+        if(showTable){
+            // التحكم بعرض الأعمدة حسب الفصل
+            const sem1 = table.querySelectorAll(".sem1");
+            const sem2 = table.querySelectorAll(".sem2");
+            const sem3 = table.querySelectorAll(".sem3");
+
+            [...sem1, ...sem2, ...sem3].forEach(el => el.style.display="");
+
+            if(semesterValue === "1"){
+                sem2.forEach(el => el.style.display="none");
+                sem3.forEach(el => el.style.display="none");
+            }
+            if(semesterValue === "2"){
+                sem1.forEach(el => el.style.display="none");
+                sem3.forEach(el => el.style.display="none");
+            }
+            if(semesterValue === "3"){
+                sem1.forEach(el => el.style.display="none");
+                sem2.forEach(el => el.style.display="none");
+            }
         }
-
-        if(groupValue && tableGroup !== groupValue){
-            show = false;
-        }
-
-        table.style.display = show ? "block" : "none";
-
     });
-
 }
-
 function showAll(){
 
     const tables = document.querySelectorAll(".table-wrapper");
