@@ -513,6 +513,33 @@ function showAll(){
     });
 
 }
+document.getElementById("semesterFilter").addEventListener("change", function(){
+
+    const value = this.value;
+
+    const sem1 = document.querySelectorAll(".sem1");
+    const sem2 = document.querySelectorAll(".sem2");
+    const sem3 = document.querySelectorAll(".sem3");
+
+    // إظهار الكل أولاً
+    [...sem1, ...sem2, ...sem3].forEach(el => el.style.display="");
+
+    if(value === "1"){
+        sem2.forEach(el => el.style.display="none");
+        sem3.forEach(el => el.style.display="none");
+    }
+
+    if(value === "2"){
+        sem1.forEach(el => el.style.display="none");
+        sem3.forEach(el => el.style.display="none");
+    }
+
+    if(value === "3"){
+        sem1.forEach(el => el.style.display="none");
+        sem2.forEach(el => el.style.display="none");
+    }
+
+});
 </script>
 
 </body>
