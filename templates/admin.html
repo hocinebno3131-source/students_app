@@ -6,105 +6,168 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
-body { font-family: 'Cairo', sans-serif; background: #f4f6f9; margin: 0; padding: 20px; color: #333; }
-h1 { text-align: center; color: #1976d2; }
+body { 
+    font-family: 'Cairo', sans-serif; 
+    background: linear-gradient(120deg, #f0f4ff, #e6f0ff); 
+    margin: 0; 
+    padding: 20px; 
+    color: #333; 
+}
 
-.filters { display: flex; gap: 15px; justify-content: center; margin-bottom: 25px; flex-wrap: wrap; }
+h1 { 
+    text-align: center; 
+    color: #0d47a1; 
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    font-size: 2.2em;
+    margin-bottom: 25px;
+}
+
+.filters { 
+    display: flex; 
+    gap: 15px; 
+    justify-content: center; 
+    margin-bottom: 25px; 
+    flex-wrap: wrap; 
+}
 
 select, button {
-    padding: 10px 15px;
-    border-radius: 8px;
+    padding: 10px 18px;
+    border-radius: 12px;
     border: none;
     font-size: 16px;
     cursor: pointer;
     transition: 0.3s;
-}
-/* لمنع التفاف نص رأس العمود */
-th:last-child {
-    white-space: nowrap; 
-    width: 12%;  /* اضبط العرض حسب الحاجة */
-    text-align: center;
-    vertical-align: middle;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
 
-/* لمحاذاة محتوى الخلايا في عمود الإجراءات */
-td:last-child {
-    white-space: nowrap; 
-    text-align: center;
-    vertical-align: middle;
+select { 
+    background: #f1f5ff; 
+    color: #0d47a1; 
 }
-select { background: #e0e0e0; }
-select:hover { background: #d5d5d5; }
+select:hover { background: #dbe9ff; }
 
-button { background: #1976d2; color: white; }
-button:hover { background: #0d47a1; }
+button { 
+    background: #1976d2; 
+    color: white; 
+    font-weight: bold;
+}
+button:hover { 
+    background: #0d47a1; 
+    transform: scale(1.05);
+}
 
-#printBtn { background: #f57c00; }
-#printBtn:hover { background: #ef6c00; }
+#printBtn { 
+    background: #f57c00; 
+}
+#printBtn:hover { 
+    background: #ef6c00; 
+}
 
-.delete-btn { background: #e53935; padding: 6px 10px; font-size: 14px; }
-.delete-btn:hover { background: #b71c1c; }
+.delete-btn { 
+    background: #e53935; 
+    padding: 6px 12px; 
+    font-size: 14px; 
+    border-radius: 8px;
+}
+.delete-btn:hover { background: #b71c1c; transform: scale(1.05); }
 
-.edit-btn { background: #43a047; padding: 6px 10px; font-size: 14px; }
-.edit-btn:hover { background: #2e7d32; }
+.edit-btn { 
+    background: #43a047; 
+    padding: 6px 12px; 
+    font-size: 14px; 
+    border-radius: 8px;
+}
+.edit-btn:hover { background: #2e7d32; transform: scale(1.05); }
 
-.save-btn { background: #1976d2; padding: 6px 10px; font-size: 14px; display:none; }
-.cancel-btn { background: #757575; padding: 6px 10px; font-size: 14px; display:none; }
+.save-btn { 
+    background: #1976d2; 
+    padding: 6px 12px; 
+    font-size: 14px; 
+    display:none; 
+    border-radius: 8px;
+}
+.cancel-btn { 
+    background: #757575; 
+    padding: 6px 12px; 
+    font-size: 14px; 
+    display:none; 
+    border-radius: 8px;
+}
 
 table {
     width: 100%;
     border-collapse: collapse;
-    table-layout: fixed; /* توحيد الأعمدة */
-    word-break: break-word; /* السماح لكسر الكلمات الطويلة */
+    table-layout: fixed;
+    word-break: break-word;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 th, td {
-    padding: 8px 10px;
+    padding: 10px 12px;
     text-align: center;
-    word-wrap: break-word; /* التفاف النص داخل الخلية */
-    overflow-wrap: break-word; /* دعم إضافي للكسر */
 }
 
-th { background: #1976d2; color: white; }
-tr:nth-child(even) { background: #f1f1f1; }
+th { 
+    background: #0d47a1; 
+    color: white; 
+    text-transform: uppercase;
+}
 
-.table-title { margin: 15px 0 5px 0; font-size: 18px; font-weight: bold; }
+tr:nth-child(even) { background: #f9faff; }
+tr:hover { background: #e3f2fd; }
 
-/* تحديد عرض الأعمدة */
-th:nth-child(1), td:nth-child(1) { width: 10%; } /* اللقب */
-th:nth-child(2), td:nth-child(2) { width: 10%; } /* الاسم */
-th:nth-child(3), td:nth-child(3) { width: 10%; } /* القسم */
-th:nth-child(4), td:nth-child(4) { width: 10%; } /* الفوج */
-th:nth-child(5), td:nth-child(5),
-th:nth-child(6), td:nth-child(6),
-th:nth-child(7), td:nth-child(7),
-th:nth-child(8), td:nth-child(8),
-th:nth-child(9), td:nth-child(9),
-th:nth-child(10), td:nth-child(10),
-th:nth-child(11), td:nth-child(11),
-th:nth-child(12), td:nth-child(12),
-th:nth-child(13), td:nth-child(13) { width: 6%; } /* درجات */
-th:nth-child(14), td:nth-child(14) { width: 12%; } /* إجراءات */
+.table-title { 
+    margin: 20px 0 10px 0; 
+    font-size: 1.3em; 
+    font-weight: bold; 
+    color: #0d47a1;
+}
 
-/* صف في وضع التعديل */
-.editing-row { background-color: #fff9c4 !important; transition: 0.3s; }
+.editing-row { background-color: #fffde7 !important; transition: 0.3s; }
 
-/* نافذة الحذف */
-#deleteModal { display: none; position: fixed; top: 0; left: 0; right:0; bottom:0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
-#deleteModal .modal-content { background: #ffeb3b; padding: 25px; border-radius: 12px; text-align: center; max-width: 400px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); font-size: 18px; font-weight: bold; }
-#deleteModal .modal-content button { margin-top: 15px; padding: 10px 20px; font-size: 16px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+#deleteModal, #arabicModal { 
+    display: none; 
+    position: fixed; 
+    top: 0; left: 0; right: 0; bottom: 0; 
+    background: rgba(0,0,0,0.6); 
+    justify-content: center; 
+    align-items: center; 
+    z-index: 1000; 
+}
+
+#deleteModal .modal-content, #arabicModal .modal-content {
+    background: #ffffff; 
+    padding: 25px; 
+    border-radius: 12px; 
+    text-align: center; 
+    max-width: 400px; 
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25); 
+    font-size: 18px; 
+    font-weight: bold;
+}
+
+#deleteModal .modal-content button, #arabicModal .modal-content button {
+    margin-top: 15px; 
+    padding: 10px 20px; 
+    font-size: 16px; 
+    font-weight: bold; 
+    border: none; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    transition: 0.3s; 
+}
+
 #deleteConfirm { background: #e53935; color: white; }
-#deleteConfirm:hover { background: #b71c1c; }
+#deleteConfirm:hover { background: #b71c1c; transform: scale(1.05); }
+
 #deleteCancel { background: #757575; color: white; }
-#deleteCancel:hover { background: #424242; }
+#deleteCancel:hover { background: #424242; transform: scale(1.05); }
 
-/* نافذة التحذير عند كتابة غير العربية */
-#arabicModal { display: none; position: fixed; top: 0; left: 0; right:0; bottom:0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
-#arabicModal .modal-content { background: #ffeb3b; padding: 25px; border-radius: 12px; text-align: center; max-width: 400px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); font-size: 18px; font-weight: bold; }
-#arabicModal .modal-content button { margin-top: 15px; padding: 10px 20px; font-size: 16px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; transition: 0.3s; background: #f44336; color: white; }
-#arabicModal .modal-content button:hover { background: #d32f2f; }
+#arabicModal .modal-content button { background: #f44336; color: white; }
+#arabicModal .modal-content button:hover { background: #d32f2f; transform: scale(1.05); }
 
-/* الطباعة */
 @media print {
     body * { visibility: hidden; }
     #tablesContainer, #tablesContainer * { visibility: visible; }
