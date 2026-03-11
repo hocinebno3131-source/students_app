@@ -40,11 +40,12 @@ body {
 /* =========================== */
 /* صندوق النموذج */
 .container { 
-    max-width: 500px; 
+    flex: 1;              /* يجعل النافذة تتمدد */
+    max-width: none;      /* يزيل الحد الأقصى للعرض */
     width: 100%;
-    min-height: 90vh; /* زيادة طول الصندوق */
-    background: rgba(25,118,210,0.9); /* خلفية شفافة قليلاً لتظهر الصورة */
-    padding: 40px; /* تكبير الحشو */
+    min-height: 90vh;
+    background: rgba(25,118,210,0.9);
+    padding: 40px;
     border-radius: 12px; 
     box-shadow: 0 10px 25px rgba(0,0,0,0.3); 
     color: white;
