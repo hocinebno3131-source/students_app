@@ -24,6 +24,18 @@ body {
     flex:1;
     max-width:500px;
     margin:auto;
+}
+ .image-side{
+    flex:1;
+    background: url('/static/images/background.jpg') no-repeat center center;
+    background-size: contain;
+    background-color:#e3f2fd;
+}
+
+.container{
+    flex:1;
+    max-width:500px;
+    margin:auto;
 }    
 /* =========================== */
 /* صندوق النموذج */
@@ -138,7 +150,8 @@ input:focus, select:focus {
 </style>
 </head>
 <body>
-<div class="container">
+<div class="image-side"></div>
+ <div class="container">
     <h2>نموذج تسجيل الطلبة</h2>
     <form method="POST" action="/" id="studentForm">
         <input type="text" name="last_name" placeholder="اللقب" required>
