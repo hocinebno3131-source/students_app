@@ -8,17 +8,23 @@
 /* =========================== */
 /* الخلفية للجسم */
 body {
-    background: url('/static/images/background.jpg') no-repeat center center fixed;
-    background-size: 50% auto; /* حجم أصغر قليلاً مع الحفاظ على النسبة */ 
-    background-color: #f0f0f0;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh; /* يملأ طول الشاشة */
+    height: 100vh;
     margin: 0;
-    padding: 20px;
+    background: #f0f0f0;
+}
+.image-side{
+    flex:1;
+    background: url('/static/images/background.jpg') no-repeat center center;
+    background-size: contain;
+    background-color:#e3f2fd;
 }
 
+.container{
+    flex:1;
+    max-width:500px;
+    margin:auto;
+}    
 /* =========================== */
 /* صندوق النموذج */
 .container { 
