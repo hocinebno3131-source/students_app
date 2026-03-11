@@ -84,13 +84,36 @@ input:focus, select:focus {
 }
 .buttons button { 
     flex: 1; 
-    padding: 14px; /* تكبير الأزرار */
+    padding: 14px; 
     border: none; 
-    border-radius: 8px; 
-    font-size: 18px; /* تكبير الكتابة */
+    border-radius: 10px; 
+    font-size: 20px; 
     cursor: pointer; 
-    font-weight: bold; 
-    transition: 0.3s;
+    font-weight: 700;
+    font-family: 'Cairo', sans-serif; /* خط أجمل */
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* زر الإرسال */
+#submitBtn { 
+    background: linear-gradient(45deg, #4caf50, #81c784);
+    color: white; 
+}
+#submitBtn:hover { 
+    background: linear-gradient(45deg, #388e3c, #66bb6a);
+    transform: translateY(-2px);
+}
+
+/* زر الإلغاء / الخروج */
+#cancelBtn { 
+    background: linear-gradient(45deg, #e53935, #ef5350);
+    color: white; 
+}
+#cancelBtn:hover { 
+    background: linear-gradient(45deg, #b71c1c, #e57373);
+    transform: translateY(-2px);
 }
 #submitBtn { 
     : #4caf50; 
