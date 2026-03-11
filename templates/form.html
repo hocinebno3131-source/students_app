@@ -135,21 +135,23 @@ input:focus, select:focus {
     display: none;
     position: fixed;
     top: 0; left: 0; right:0; bottom:0;
-    : rgba(0,0,0,0.5);
+    background : rgba(0,0,0,0.5);
     justify-content: center;
     align-items: center;
     z-index: 1000;
 }
 #arabicModal .modal-content {
-    color: #e53935; /* لون النص الأحمر */
-    font-size: 18px;
+    color: #e53935; /* يمكنك تركه أو تغييره حسب النص */
+    font-size: 18px; /* زوّد الحجم، مثلاً 20px أو 22px */
     font-family: 'Cairo', sans-serif;
     font-weight: bold;
     text-align: center;
-    background: #ffe4e1; /* وردي فاتح يعطي إحساس بالانتباه */
-border: 2px solid #ff6f61; /* حدود وردي داكن */
-    box-shadow: 0 8px 20px rgba(0,0,0,0.3); /* ظل لطيف */
-    border-radius: 12px; /* حواف مستديرة */
+    background: #ffe4e1; /* يمكن تغييره حسب رغبتك */
+    border: 2px solid #ff6f61;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    border-radius: 12px;
+    padding: 30px; /* أضف هذا السطر لتكبير النافذة */
+    max-width: 450px; /* زيادة عرض النافذة قليلًا */
 }
 #arabicModal .modal-content button {
     margin-top: 15px;
@@ -162,11 +164,16 @@ border: 2px solid #ff6f61; /* حدود وردي داكن */
     transition: 0.3s;
 }
 #arabicModal .modal-content button#closeModal {
-    : #f44336; 
-    color: white;
+    background: #f44336; /* يمكنك تغييره إذا أحببت لون مختلف */
+    color: #000; /* لجعل نص الإغلاق أسود */
+    padding: 12px 25px; /* تكبير الزر */
+    font-size: 18px;    /* تكبير النص */
+    font-weight: 700;
+    border-radius: 12px;
 }
 #arabicModal .modal-content button#closeModal:hover {
     background: #d32f2f;
+    transform: translateY(-2px); 
 }
 .moving-text {
     color: red;                  /* اللون الأحمر */
